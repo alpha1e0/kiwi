@@ -1,0 +1,10 @@
+[
+    {
+        "caption": "Bugtrack: code analysis",
+        "command": "analysis_code",
+        "args": {
+            "dirs": [],
+            "files": []
+        }
+    }
+]
