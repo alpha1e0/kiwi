@@ -1,10 +1,16 @@
 [
     {
-        "caption": "Bugtrack: code analysis",
-        "command": "analysis_code",
+        "caption": "-"
+    },
+    {
+        "caption": "BugTrack: code analysis",
+        "command": "code_analysis",
         "args": {
             "dirs": [],
             "files": []
         }
+    },
+    {
+        "caption": "-", "id": "bugtrack_commands"
     }
 ]
