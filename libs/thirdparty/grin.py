@@ -24,7 +24,7 @@ MATCH = 0
 POST = 1
 
 # Use file(1)'s choices for what's text and what's not.
-TEXTCHARS = ''.join(map(chr, [7,8,9,10,12,13,27] + range(0x20, 0x100)))
+TEXTCHARS = ''.join(map(chr, [7,8,9,10,12,13,27] + list(range(0x20, 0x100))))
 ALLBYTES = ''.join(map(chr, range(256)))
 
 COLOR_TABLE = ['black', 'red', 'green', 'yellow', 'blue', 'magenta', 'cyan',
@@ -588,7 +588,7 @@ class FileRecognizer(object):
         """
         try:
             bytes = f.read(self.binary_bytes)
-        except Exception, e:
+        except Exception as e:
             # When trying to read from something that looks like a gzipped file,
             # it may be corrupt. If we do get an error, assume that the file is binary.
             return True
@@ -756,7 +756,7 @@ def get_grin_arg_parser(parser=None):
         parser = argparse.ArgumentParser(
             description="Search text files for a given regex pattern.",
             epilog="Bug reports to <enthought-dev@mail.enthought.com>.",
-            formatter_class=argparse.RawDescriptionHelpFormatter,
+            #formatter_class=argparse.RawDescriptionHelpFormatter,
         )
 
     parser.add_argument('-v', '--version', action='version', version='grin %s' % __version__,
@@ -1011,19 +1011,20 @@ def grin_main(argv=None):
     try:
 #        import pdb
 #        pdb.set_trace()
-        if argv is None:
-            # Look at the GRIN_ARGS environment variable for more arguments.
-            env_args = shlex.split(os.getenv('GRIN_ARGS', ''))
-            argv = [sys.argv[0]] + env_args + sys.argv[1:]
-        parser = get_grin_arg_parser()
-        args = parser.parse_args(argv[1:])
-        if args.context is not None:
-            args.before_context = args.context
-            args.after_context = args.context
-        args.use_color = args.force_color or (not args.no_color and
-            sys.stdout.isatty() and
-            (os.environ.get('TERM') != 'dumb'))
-
+#        if argv is None:
+#            # Look at the GRIN_ARGS environment variable for more arguments.
+#            env_args = shlex.split(os.getenv('GRIN_ARGS', ''))
+#            argv = [sys.argv[0]] + env_args + sys.argv[1:]
+#        parser = get_grin_arg_parser()
+#        args = parser.parse_args(argv[1:])
+        args = argv
+#        if args.context is not None:
+#            args.before_context = args.context
+#            args.after_context = args.context
+#        args.use_color = args.force_color or (not args.no_color and
+#            sys.stdout.isatty() and
+#            (os.environ.get('TERM') != 'dumb'))
+        args = 
         regex = get_regex(args)
         g = GrepText(regex, args)
         openers = dict(text=open, gzip=gzip.open)
@@ -1040,7 +1041,7 @@ def grin_main(argv=None):
         raise
 
 def print_line(filename):
-    print filename
+    print(filename)
 
 def print_null(filename):
     # Note that the final filename will have a trailing NUL, just like 
