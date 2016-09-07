@@ -9,6 +9,7 @@ Copyright (c) 2016 alpha1e0
 
 import sys
 import os
+import re
 
 import sublime
 import sublime_plugin
@@ -24,6 +25,8 @@ except ImportError:
 
 class CodeAnalysis(sublime_plugin.TextCommand):
     def run(self, edit, **args):
-        grin.grin_main(['bugtrack', 'os.system'])
-        print(args)
+        g = grin.GrepText(re.compile("grin_main"))
+        o = g.do_grep(open("/Users/apple/tmp/grin-1.2.1/grin.py"))
+        print(o)
+        #print(args)
 
