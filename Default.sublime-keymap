@@ -1,0 +1,16 @@
+[
+{
+  "keys": ["enter"],
+  "command": "result_jump",
+  "context": [
+    { "key": "selector", "operator": "equal", "operand": "text.bugtrack" }
+  ]
+},
+{
+  "keys": ["g"],
+  "command": "result_jump",
+  "context": [
+    { "key": "selector", "operator": "equal", "operand": "text.bugtrack" }
+  ]
+}
+]

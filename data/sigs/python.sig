@@ -6,21 +6,37 @@
 ###########################################################################
 
 
-rules:
-  PY_OS_INJECT_0001:
-    type: 1
-    pattern: "os.system"
-    description: "os command execute"
-    score: 8
-    action: match
-  PY_OS_INJECT_0002:
-    type: 1
-    pattern: "os.system"
-    description: "os command execute"
-    score: 8
-    action: match
-
-types:
-  1: "os command execute"
-
-version: 1.0
+- os.system
+- os.popen
+- subprocess.call
+- subprocess.Popen
+- subprocess.check_call
+- subprocess.check_output
+- commands.getoutput
+- commands.getstatusoutput
+- os.remove
+- os.unlink
+- os.rmdir
+- os.removedirs
+- shutil.rmtree
+- write/writelines
+- __import__
+- importlib.import_module
+- imp.load_module
+- imp.load_source
+- imp.load_compiled
+- imp.load_dynamic
+- pickle/cPickle
+- pickle.load
+- pickle.dump
+- yaml.load
+- yaml.dump
+- select
+- insert
+- drop
+- delete
+- eval
+- eval_r
+- exec
+- execfile
+- compile

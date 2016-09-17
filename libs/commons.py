@@ -30,12 +30,14 @@ class BaseError(Exception):
 
 class FileError(BaseError):
     def __str__(self):
-        return "File error" + self._msg
+        return "File error " + self._msg
 
 
 
 def getPluginPath():
     return os.path.join(sublime.packages_path(), PULGIN_NAME)
+    # debug>>>>>>>>>>
+    #return "/Users/apple/Library/Application Support/Sublime Text 3/Packages/bugtrack/"
 
 
 
@@ -59,7 +61,7 @@ class YamlConf(object):
 
 
 def loadFileMappingCfg():
-    cfgFile = os.path.join(getPluginPath, "data", "filemapping")
+    cfgFile = os.path.join(getPluginPath(), "data", "filemap")
 
     return YamlConf(cfgFile)
 
@@ -78,6 +80,9 @@ class CacheManage(object):
 
 
     def addFile(self, name, content):
-        pass
+        cacheFileName = os.path.join(self._cachePath, name)
+
+        with open(cacheFileName, 'w') as _file:
+            _file.write(content)
 
 
