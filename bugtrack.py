@@ -21,8 +21,9 @@ try:
 except ImportError:
     sys.path.append(os.path.dirname(os.path.realpath(__file__)))
     
-from libs.search import FileSet
+from libs.analyse import FileSet
 from libs.commons import CacheManage
+from libs.commons import threadTask
 
 
 
@@ -33,6 +34,7 @@ class CodeAnalysisCommand(sublime_plugin.TextCommand):
         self.doAnalyse(projDir, sublime)
 
 
+    @threadTask
     def doAnalyse(self, projDir, sublimeObj):
         try:
             fileset = FileSet(projDir)

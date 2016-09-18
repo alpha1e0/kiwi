@@ -25,7 +25,7 @@ class Engine(object):
         pass
 
 
-    def search(self, fileName, pattern):
+    def analyse(self, fileName, pattern):
         '''
         @returns
             return the 'match-entry' list, the format of 'match entry' is:
@@ -38,15 +38,18 @@ class Engine(object):
 
         try:
             with open(fileName, encoding='utf-8') as _file:
-                seachResult = grebob.do_grep(_file)
+                searchResult = grebob.do_grep(_file)
         except UnicodeDecodeError:
             try:
                 with open(fileName, encoding='gbk') as _file:
-                    seachResult = grebob.do_grep(_file)
+                    searchResult = grebob.do_grep(_file)
             except UnicodeDecodeError:
-                raise FileError("read/decode file {0} error".format(fileName))
-
-        return [(x[0], x[2], x[3]) for x in seachResult]
+                #raise FileError("read/decode file {0} error".format(fileName))
+                return []
+            except LookupError:
+                return []
+        
+        return [((x[0]+1), x[2], x[3]) for x in searchResult]
         
 
 

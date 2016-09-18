@@ -14,20 +14,24 @@ import time
 
 
 from libs.commons import FileError
-from libs.commons import loadFileMappingCfg
 from libs.commons import YamlConf
+from libs.commons import getPluginPath
 from libs import engines
 
 
 
-class SearchResult(object):
+class AnalyseResult(object):
     def __init__(self):
         self._data = {}
         self._patternList = []
-        self._fileList = []
+        self._filenameList = []
 
 
-    def _getPatternIndex(self, pattern):
+    def _addPattern(self, pattern):
+        '''
+        Add a pattern string to the patternList and return the index, \
+            if the pattern dose exsits just return the index
+        '''
         for i in range(len(self._patternList)):
             if self._patternList[i] == pattern:
                 patternIndex = i
@@ -39,21 +43,25 @@ class SearchResult(object):
         return patternIndex
 
 
-    def _getFileIndex(self, filename):
-        for i in range(len(self._fileList)):
-            if self._fileList[i] == filename:
+    def _addFilename(self, filename):
+        '''
+        Add a file name string to the filenameList and return the index, \
+            if the file name dose exsits just return the index
+        '''
+        for i in range(len(self._filenameList)):
+            if self._filenameList[i] == filename:
                 fileIndex = i
                 break
         else:
-            self._fileList.append(filename)
-            fileIndex = len(self._fileList)-1
+            self._filenameList.append(filename)
+            fileIndex = len(self._filenameList)-1
 
         return fileIndex
 
 
     def add(self, ftype, pattern, filename, matchs):
-        patternIndex = self._getPatternIndex(pattern)
-        fileIndex = self._getFileIndex(filename)
+        patternIndex = self._addPattern(pattern)
+        fileIndex = self._addFilename(filename)
 
         if ftype not in self._data:
             self._data[ftype] = {}
@@ -91,7 +99,7 @@ class SearchResult(object):
                     if fileResult:
                         blockStr = "\n".join(["{{{0}}}[{1}]".format(ftype, \
                             self._patternList[patternIndex]),\
-                            "{0}:".format(self._fileList[fileIndex])])
+                            "{0}:".format(self._filenameList[fileIndex])])
 
                         matchStr = ""
                         for match in fileResult:
@@ -113,9 +121,15 @@ class FileSet(object):
 
         self.directory = directory
 
-        self._fileMapping = loadFileMappingCfg()
+        self._fileMapping = self._loadFileMappingCfg()
 
         self._fileSet = self._initFileSet()
+
+
+    def _loadFileMappingCfg(self):
+        cfgFile = os.path.join(getPluginPath(), "data", "filemap")
+
+        return YamlConf(cfgFile)
 
 
     def _getFileType(self, fileName):
@@ -182,7 +196,7 @@ class FileSet(object):
         @returns:
             {type : {pattern: {filename:[matchs]}}
         '''
-        result = SearchResult()
+        analyseResult = AnalyseResult()
 
         for ftype, files in self._fileSet.items():
             sigs = self._loadSigs(ftype)
@@ -190,8 +204,8 @@ class FileSet(object):
             for sig in sigs:
                 for file in files:
                     engine = engineClass()
-                    searchResult = engine.search(file, sig)
-                    result.add(ftype, sig, file, searchResult)
+                    result = engine.analyse(file, sig)
+                    analyseResult.add(ftype, sig, file, result)
 
-        return result
+        return analyseResult
 

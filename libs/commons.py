@@ -9,9 +9,10 @@ Copyright (c) 2016 alpha1e0
 
 
 import os
+import functools
+import threading
 
 import yaml
-import sublime
 
 
 
@@ -35,9 +36,7 @@ class FileError(BaseError):
 
 
 def getPluginPath():
-    return os.path.join(sublime.packages_path(), PULGIN_NAME)
-    # debug>>>>>>>>>>
-    #return "/Users/apple/Library/Application Support/Sublime Text 3/Packages/bugtrack/"
+    return os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
 
 
@@ -60,13 +59,6 @@ class YamlConf(object):
 
 
 
-def loadFileMappingCfg():
-    cfgFile = os.path.join(getPluginPath(), "data", "filemap")
-
-    return YamlConf(cfgFile)
-
-
-
 class CacheManage(object):
     def __init__(self, projPath):
         if not os.path.exists(projPath):
@@ -82,7 +74,21 @@ class CacheManage(object):
     def addFile(self, name, content):
         cacheFileName = os.path.join(self._cachePath, name)
 
-        with open(cacheFileName, 'w') as _file:
+        with open(cacheFileName, 'w', encoding='utf-8') as _file:
             _file.write(content)
+
+
+
+def threadTask(func):
+    @functools.wraps(func)
+    def threadFunc(*args, **kwargs):
+        def run():
+            r = func(*args, **kwargs)
+
+        t = threading.Thread(target=run)
+        #t.setDaemon(True)
+        t.start()
+
+    return threadFunc
 
 
