@@ -1,4 +1,5 @@
 {
+    "cache_directory_name": ".cache",
     // This setting-entry identify the color scheme of the analyse result.
     "analyse_result_color_scheme": "Packages/bugtrack/bugtrack.hidden-tmTheme",
 

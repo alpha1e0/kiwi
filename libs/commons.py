@@ -60,13 +60,13 @@ class YamlConf(object):
 
 
 class CacheManage(object):
-    def __init__(self, projPath):
+    def __init__(self, projPath, cacheDirName):
         if not os.path.exists(projPath):
             raise FileError("project path '{0}' dose not exists".format(projPath))
         else:
             self._projPath = projPath
 
-        self._cachePath = os.path.join(projPath, ".cache")
+        self._cachePath = os.path.join(projPath, cacheDirName)
         if not os.path.exists(self._cachePath):
             os.mkdir(self._cachePath)
 
@@ -79,14 +79,13 @@ class CacheManage(object):
 
 
 
-def threadTask(func):
+def runInThread(func):
     @functools.wraps(func)
     def threadFunc(*args, **kwargs):
         def run():
             r = func(*args, **kwargs)
 
         t = threading.Thread(target=run)
-        #t.setDaemon(True)
         t.start()
 
     return threadFunc

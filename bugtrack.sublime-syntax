@@ -21,13 +21,9 @@ contexts:
         1: entity.name.bugtrack.file-type
         2: entity.name.bugtrack.search-pattern
 
-    - match: "^([^ ].*):$"
+    - match: "^@(.+):$"
       captures:
         1: entity.name.bugtrack.file-name
-
-    - match: "^ +([0-9]+) "
-      captures:
-        1: constant.numeric.bugtrack.line-number
 
     - match: "^ +([0-9]+):"
       captures:

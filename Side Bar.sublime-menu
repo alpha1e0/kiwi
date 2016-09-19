@@ -4,7 +4,7 @@
     },
     {
         "caption": "BugTrack: code analysis",
-        "command": "code_analysis",
+        "command": "security_analysis",
         "args": {
             "dirs": [],
             "files": []

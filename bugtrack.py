@@ -21,26 +21,29 @@ try:
 except ImportError:
     sys.path.append(os.path.dirname(os.path.realpath(__file__)))
     
-from libs.analyse import FileSet
+from libs.analyzer import Analyzer
 from libs.commons import CacheManage
-from libs.commons import threadTask
+from libs.commons import runInThread
 
 
 
-class CodeAnalysisCommand(sublime_plugin.TextCommand):
+class SecurityAnalysisCommand(sublime_plugin.TextCommand):
     def run(self, edit, **args):
         projDir = args['dirs'][0]
 
         self.doAnalyse(projDir, sublime)
 
 
-    @threadTask
+    @runInThread
     def doAnalyse(self, projDir, sublimeObj):
+        settings = sublime.load_settings('bugtrack.sublime-settings')
+        cacheDirName = settings.get("cache_directory_name", ".cache")
         try:
-            fileset = FileSet(projDir)
-            result = fileset.doAnalyse()
+            analyzer = Analyzer(projDir)
+            result = analyzer.doAnalyse()
 
-            cachem = CacheManage(projDir)
+            cachem = CacheManage(projDir, cacheDirName)
+
             resultFile = os.path.basename(projDir) + ".bugtrack"
             cachem.addFile(resultFile,result.toString())
         except Exception as error:
@@ -51,35 +54,56 @@ class CodeAnalysisCommand(sublime_plugin.TextCommand):
 class ResultJumpCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         for sel in self.view.sel():
-            line_no = self._get_line_no(sel)
+            line_number = self._get_line_number(sel)
             file_name = self._get_file_name(sel)
 
-            if line_no and file_name:
-                file_loc = "{0}:{1}".format(file_name, line_no)
+            if line_number and file_name:
+                file_loc = "{0}:{1}".format(file_name, line_number)
                 self.view.window().open_file(file_loc, sublime.ENCODED_POSITION)
             elif file_name:
                 self.view.window().open_file(file_name)
 
 
-    def _get_line_no(self, sel):
-        line_text = self.view.substr(self.view.line(sel))
-        match = re.match(r"\s*(\d+).+", line_text)
+    def _match_line_number(self, line):
+        line_number_pattern = re.compile(r"^\s*(\d+):.*")
+        match = line_number_pattern.match(line)
+        
+        return match.group(1) if match else None
+
+
+    def _match_file_name(self, line):
+        file_name_pattern = re.compile(r"^@(.+):$")
+        match = file_name_pattern.match(line)
 
         return match.group(1) if match else None
 
 
+    def _get_line_number(self, sel):
+        line_text = self.view.substr(self.view.line(sel))
+
+        return self._match_line_number(line_text)
+
+
     def _get_file_name(self, sel):
-        line = self.view.line(sel)
+        line_region = self.view.line(sel)
+        line_text = self.view.substr(line_region)
 
-        while line.begin() > 0:
-            line_text = self.view.substr(line)
-            match = re.match(r"(.+):$", line_text)
-
+        match = self._match_file_name(line_text)
+        if match:
+            if os.path.exists(match):
+                return match
+        else:
+            match = self._match_line_number(line_text)
             if match:
-                if os.path.exists(match.group(1)):
-                    return match.group(1)
+                while line_region.begin() > 0:
+                    line_text = self.view.substr(line_region)
+                    match = self._match_file_name(line_text)
 
-            line = self.view.line(line.begin() - 1)
+                    if match:
+                        if os.path.exists(match):
+                            return match
+
+                    line_region = self.view.line(line_region.begin() - 1)
 
         return None
 

@@ -1,0 +1,40 @@
+[
+    {
+        "caption": "Preferences",
+        "mnemonic": "n",
+        "id": "preferences",
+        "children":
+        [
+            {
+                "caption": "Package Settings",
+                "mnemonic": "P",
+                "id": "package-settings",
+                "children":
+                [
+                    {
+                        "caption": "Bugtrack",
+                        "children":
+                        [
+                            {
+                                "command": "open_file",
+                                "args": {"file": "${packages}/bugtrack/README.md"},
+                                "caption": "README"
+                            },
+                            { "caption": "-" },
+                            {
+                                "command": "open_file",
+                                "args": {"file": "${packages}/bugtrack/bugtrack.sublime-settings"},
+                                "caption": "Main settings"
+                            },
+                            {
+                                "command": "open_file",
+                                "args": {"file": "${packages}/bugtrack/file_ignore.sublime-settings"},
+                                "caption": "File ignore settings"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

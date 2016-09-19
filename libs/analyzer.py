@@ -99,7 +99,7 @@ class AnalyseResult(object):
                     if fileResult:
                         blockStr = "\n".join(["{{{0}}}[{1}]".format(ftype, \
                             self._patternList[patternIndex]),\
-                            "{0}:".format(self._filenameList[fileIndex])])
+                            "@{0}:".format(self._filenameList[fileIndex])])
 
                         matchStr = ""
                         for match in fileResult:
@@ -114,7 +114,7 @@ class AnalyseResult(object):
 
 
 
-class FileSet(object):
+class Analyzer(object):
     def __init__(self, directory):
         if not os.path.exists(directory):
             raise FileError("FileSet cannot find directory '{0}'".format(directory))
