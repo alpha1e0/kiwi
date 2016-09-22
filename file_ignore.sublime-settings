@@ -1,8 +1,14 @@
 {
     "files": [
+        ".gitignore"
     ],
     "directories": [
+        ".git",
+        ".svn",
+        "cvs"
     ],
     "extensions": [
+        "pyc",
+        ""
     ]
 }

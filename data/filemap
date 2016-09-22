@@ -1,11 +1,30 @@
-###########################################################################
+#===============================================================================
 # Bugtrack, a sublime plugin for finding security bugs.
 # Copyright (c) 2016 alpha1e0
-# ======================================================================
-# file mapping configure
-###########################################################################
+# -----------------------------------------------------------------------------
+# file mapping configuration
+#===============================================================================
 
 
-".py": python
-".php": php
-".java": java
+extension:
+  - pattern: "py"
+    scope: python
+
+  - pattern: "php\\d+"
+    scope: php
+
+  - pattern: "java"
+    scope: java
+
+  - pattern: "sh"
+    scope: linux-shell
+
+metainfo:
+  - pattern: "#!/usr/bin\\w+python"
+    scope: python
+
+  - pattern: "<?php"
+    scope: php
+
+  - pattern: "#!/bin/\\w+sh"
+    scope: linux-shell

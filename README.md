@@ -1,24 +1,23 @@
-# 1 bugtrack
 
-## About
+## 1 About
 
-`bugtrack` is a tool for finding security bugs from the source code.
+`bugtrack` is a security tool for code analysis from the source code.
 
-## Install
+## 2 Install
 
 Now, `bugtrack` only support **Sublime Text 3**.
 
-1. Open the package directory
+Step 1. Open the package directory
 
 > Preferences --> Browse packages
 
-2. Get the latest version of bugtrack
+Step 2. Get the latest version of bugtrack
 
 > git clone https://github.com/alpha1e0/bugtrack.git
 
-3. Rename the package downloaded to **bugtrack**, and move it to the package directory
+Step 3. Rename the package downloaded to **bugtrack**, and move it to the package directory
 
-## Usage
+## 3 Usage
 
 
-## Remark
+## 4 Remark

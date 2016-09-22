@@ -1,9 +1,22 @@
-###########################################################################
+#===============================================================================
 # Bugtrack, a sublime plugin for finding security bugs.
 # Copyright (c) 2016 alpha1e0
-# ======================================================================
-# signature file for python
-###########################################################################
+# -----------------------------------------------------------------------------
+# Sensitive information leaking
+#===============================================================================
 
-- password
-- passwd
+version: 1.0
+
+engine: GrepEngine
+
+scopes: 
+  - python
+
+rules:
+  - SI-0001:
+      severity: High
+      confidence: High
+      information: "Password information leaking"
+      references: []
+      patterns:
+        - password
