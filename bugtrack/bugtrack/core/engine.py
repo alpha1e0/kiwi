@@ -19,8 +19,6 @@ from libs.thirdparty import grin
 
 
 class Engine(object):
-    TYPE = "raw"
-
     def __init__(self):
         pass
 
@@ -53,5 +51,15 @@ class Engine(object):
         
 
 
-class PythonEngine(Engine):
-    Type = "python"
+class GrepEngine(Engine):
+    def __init__(self):
+        pass
+
+
+    def analyse(self, target, signature):
+
+
+
+
+
+

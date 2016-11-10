@@ -20,6 +20,7 @@ from libs import engines
 
 
 
+
 class AnalyseResult(object):
     def __init__(self):
         self._data = {}
@@ -114,10 +115,10 @@ class AnalyseResult(object):
 
 
 
-class Analyzer(object):
+class RegularAnalyzer(object):
     def __init__(self, directory):
         if not os.path.exists(directory):
-            raise FileError("FileSet cannot find directory '{0}'".format(directory))
+            raise FileError("Analyzer cannot find directory '{0}'".format(directory))
 
         self.directory = directory
 

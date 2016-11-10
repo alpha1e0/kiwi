@@ -1,3 +1,6 @@
+%YAML 1.2
+---
+
 #===============================================================================
 # Bugtrack, a sublime plugin for finding security bugs.
 # Copyright (c) 2016 alpha1e0
@@ -6,20 +9,20 @@
 #===============================================================================
 
 
-extension:
-  - pattern: "py"
+extensions:
+  - pattern: "\\.py$"
     scope: python
 
-  - pattern: "php\\d+"
+  - pattern: "\\.php\\d+$"
     scope: php
 
-  - pattern: "java"
+  - pattern: "\\.java$"
     scope: java
 
-  - pattern: "sh"
+  - pattern: "\\.sh$"
     scope: linux-shell
 
-metainfo:
+metainfos:
   - pattern: "#!/usr/bin\\w+python"
     scope: python
 

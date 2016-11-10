@@ -1,0 +1,21 @@
+%YAML 1.2
+---
+
+#===============================================================================
+# Bugtrack, a sublime plugin for finding security bugs.
+# Copyright (c) 2016 alpha1e0
+# -----------------------------------------------------------------------------
+# settings
+#===============================================================================
+
+
+# Define the ignore files pattern
+ignores:
+  directories: 
+    - .git
+    - .svn
+    - cvs
+  extensions:
+    - pyc
+  files:
+    - .gitignore

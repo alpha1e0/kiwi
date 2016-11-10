@@ -24,6 +24,7 @@ except ImportError:
 from libs.analyzer import Analyzer
 from libs.commons import CacheManage
 from libs.commons import runInThread
+from libs.commons import conf
 
 
 

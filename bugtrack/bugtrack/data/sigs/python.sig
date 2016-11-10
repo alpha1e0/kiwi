@@ -1,3 +1,6 @@
+%YAML 1.2
+---
+
 #===============================================================================
 # Bugtrack, a sublime plugin for finding security bugs.
 # Copyright (c) 2016 alpha1e0
@@ -16,7 +19,7 @@ rules:
   - PY-0001:
       severity: High
       confidence: High
-      information: "The function may be vulnerable to command injection"
+      information: "Command injection"
       references: []
       patterns:
         - os.system
@@ -27,7 +30,7 @@ rules:
   - PY-0002:
       severity: High
       confidence: Medium
-      information: "The function may be vulnerable to command injection"
+      information: "Command injection"
       references: []
       patterns:
         - subprocess.call
@@ -38,7 +41,7 @@ rules:
   - PY-0003:
       severity: Medium
       confidence: High
-      information: "Unsafe system call, my infect the file system"
+      information: "File system operationg"
       references: []
       patterns:
         - os.remove
@@ -48,9 +51,9 @@ rules:
         - shutil.rmtree
 
   - PY-0004:
-      severity: Medium
+      severity: Low
       confidence: Low
-      information: "Import a module from a string"
+      information: "Unsafe import"
       references: []
       patterns:
         - __import__

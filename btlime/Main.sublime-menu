@@ -28,8 +28,8 @@
                             },
                             {
                                 "command": "open_file",
-                                "args": {"file": "${packages}/bugtrack/file_ignore.sublime-settings"},
-                                "caption": "File ignore settings"
+                                "args": {"file": "${packages}/bugtrack/project.settings"},
+                                "caption": "Project Settings"
                             }
                         ]
                     }

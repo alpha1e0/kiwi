@@ -4,5 +4,7 @@
     "analyse_result_color_scheme": "Packages/bugtrack/bugtrack.hidden-tmTheme",
 
     // This setting-entry identify whether or not to set read-only attribute for analyse result.
-    "analyse_result_read_only": true
+    "analyse_result_read_only": true,
+
+    "file_meta_identify": false
 }
