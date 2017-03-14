@@ -1,40 +1,108 @@
 [
     {
-        "caption": "Preferences",
-        "mnemonic": "n",
-        "id": "preferences",
+        "caption": "Btlime",
+        "mnemonic": "B",
+        "id": "btlime",
         "children":
         [
             {
-                "caption": "Package Settings",
-                "mnemonic": "P",
-                "id": "package-settings",
+                "caption": "Btlime Settings",
+                "mnemonic": "S",
+                "id": "btlime-settings",
                 "children":
                 [
                     {
-                        "caption": "Bugtrack",
-                        "children":
-                        [
-                            {
-                                "command": "open_file",
-                                "args": {"file": "${packages}/bugtrack/README.md"},
-                                "caption": "README"
-                            },
-                            { "caption": "-" },
-                            {
-                                "command": "open_file",
-                                "args": {"file": "${packages}/bugtrack/bugtrack.sublime-settings"},
-                                "caption": "Main settings"
-                            },
-                            {
-                                "command": "open_file",
-                                "args": {"file": "${packages}/bugtrack/project.settings"},
-                                "caption": "Project Settings"
-                            }
-                        ]
+                        "command": "open_file",
+                        "args": {"file": "${packages}/btlime/btlime.sublime-settings"},
+                        "caption": "Main settings"
                     }
                 ]
-            }
+            },
+            { "caption": "-" },
+            {
+                "caption": "Jump To",
+                "mnemonic": "J",
+                "id": "jump-location",
+                "command": "jump_location"
+
+            },
+            {
+                "caption": "Send to Trash",
+                "mnemonic": "T",
+                "id": "sendto-trash",
+                "command": "sendto_trash"
+
+            },
+            {
+                "caption": "Send to Review",
+                "mnemonic": "R",
+                "id": "sendto-review",
+                "command": "sendto_review"
+
+            },
+            {
+                "caption": "Copy Entry",
+                "mnemonic": "C",
+                "id": "copy-entry",
+                "command": "copy_entry"
+
+            },
+            {
+                "caption": "Cut Entry",
+                "mnemonic": "c",
+                "id": "cut-entry",
+                "command": "cut_entry"
+
+            },
+            { "caption": "-" },
+            {
+                "caption": "Show/Hide Issues",
+                "mnemonic": "H",
+                "id": "show-issue",
+                "command": "show_issue"
+
+            },
+            {
+                "caption": "Code Search",
+                "mnemonic": "s",
+                "id": "code-search",
+                "command": "code_search"
+
+            },
+            {
+                "caption": "Find Forward",
+                "mnemonic": "F",
+                "id": "find-forward",
+                "command": "find_forward"
+
+            },
+            {
+                "caption": "Find First",
+                "mnemonic": "I",
+                "id": "find-first",
+                "command": "find_first"
+
+            },
+            {
+                "caption": "Record to Review",
+                "mnemonic": "R",
+                "id": "recordto-review",
+                "command": "recordto_review"
+
+            },
+            {
+                "caption": "Record to Trace",
+                "mnemonic": "r",
+                "id": "recordto-trace",
+                "command": "recordto_trace"
+
+            },
+            { "caption": "-" },
+            {
+                "command": "open_file",
+                "args": {"file": "${packages}/btlime/README.md"},
+                "caption": "README"
+            },
         ]
     }
 ]

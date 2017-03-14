@@ -3,8 +3,24 @@
         "caption": "-"
     },
     {
-        "caption": "BugTrack: code analysis",
-        "command": "security_analysis",
+        "caption": "Run bugtrack",
+        "command": "run_bugtrack",
+        "args": {
+            "dirs": [],
+            "files": []
+        }
+    },
+    {
+        "caption": "Config bugtrack",
+        "command": "config_bugtrack",
+        "args": {
+            "dirs": [],
+            "files": []
+        }
+    },
+    {
+        "caption": "Global code search",
+        "command": "global_code_search",
         "args": {
             "dirs": [],
             "files": []

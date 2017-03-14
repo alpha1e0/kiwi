@@ -1,24 +1,35 @@
+#!/usr/bin/env python
 #-*- coding:utf-8 -*-
 
 
 '''
-Bugtrack, a sublime plugin for finding security bugs.
------------------------------------------------------------------------
+Bugtrack, Security tool for auditing source code
+--------------------------------------------------------------------------------
 Copyright (c) 2016 alpha1e0
 '''
 
 
 
 class BugtrackError(Exception):
-    def __init__(self, msg):
+    def __init__(self, msg, errno=0):
         self._msg = str(msg)
+        self._errno = int(errno)
 
 
     def __str__(self):
-        return self._msg
+        if self._errno:
+            return "{} [{}]: {}".format(self.__class__.__name__, self._errno,
+                self._msg)
+        else:
+            return "{}: {}".format(self.__class__.__name__, self._errno,
+                self._msg)
 
 
 
 class FileError(BugtrackError):
-    def __str__(self):
-        return "File error " + self._msg
+    pass
+
+
+class FeatureError(BugtrackError):
+    pass
+        

@@ -1,7 +1,8 @@
+#!/usr/bin/env python
 #-*- coding:utf-8 -*-
 
-
 '''
-Bugtrack, a sublime plugin for finding security bugs
+Bugtrack, Security tool for auditing source code
+--------------------------------------------------------------------------------
 Copyright (c) 2016 alpha1e0
 '''

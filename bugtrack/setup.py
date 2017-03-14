@@ -1,8 +1,9 @@
+#!/usr/bin/env python
 #-*- coding:utf-8 -*-
 
-
 '''
-Bugtrack, a sublime plugin for finding security bugs
+Bugtrack, Security tool for auditing source code
+--------------------------------------------------------------------------------
 Copyright (c) 2016 alpha1e0
 '''
 
@@ -36,4 +37,12 @@ setup(
     url="http://example.com/HelloWorld/",   # project home page, if any
 
     # could also include long_description, download_url, classifiers, etc.
+
+    entry_points = {
+        'console_scripts': [
+            'rst2pdf = project_a.tools.pdfgen [reST]',
+            'rst2html = project_a.tools.htmlgen',
+            # more script entry points ...
+        ],
+    }
 )

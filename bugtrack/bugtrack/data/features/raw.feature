@@ -2,7 +2,7 @@
 ---
 
 #===============================================================================
-# Bugtrack, a sublime plugin for finding security bugs.
+# Bugtrack, Security tool for auditing source code
 # Copyright (c) 2016 alpha1e0
 # -----------------------------------------------------------------------------
 # Sensitive information leaking
@@ -16,11 +16,11 @@ scopes:
   - raw
   - python
 
-rules:
-  - SI-0001:
-      severity: High
-      confidence: High
-      information: "Password information leaking"
-      references: []
-      patterns:
-        - password
+features:
+- ID: RAW_PASSWD_INFO_001
+  name: "Password information leaking"
+  severity: High
+  confidence: High
+  references: []
+  patterns:
+    - password

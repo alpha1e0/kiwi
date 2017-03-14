@@ -1,16 +1,44 @@
 [
-{
-  "keys": ["enter"],
-  "command": "result_jump",
-  "context": [
-    { "key": "selector", "operator": "equal", "operand": "text.bugtrack" }
-  ]
-},
-{
-  "keys": ["g"],
-  "command": "result_jump",
-  "context": [
-    { "key": "selector", "operator": "equal", "operand": "text.bugtrack" }
-  ]
-}
+    {
+        "keys": ["ctrl+z"],
+        "command": "jump_location",
+        "context": [
+            { "key": "selector", "operator": "equal", "operand": "btlime.info" }
+        ]
+    },
+    {
+        "keys": ["ctrl+q"],
+        "command": "sendto_trash",
+        "context": [
+            { "key": "selector", "operator": "equal", "operand": "btlime.info" }
+        ]
+    },
+    {
+        "keys": ["ctrl+w"],
+        "command": "sendto_review",
+        "context": [
+            { "key": "selector", "operator": "equal", "operand": "btlime.info" }
+        ]
+    },
+    {
+        "keys": ["ctrl+e"],
+        "command": "copy_entry",
+        "context": [
+            { "key": "selector", "operator": "equal", "operand": "btlime.info" }
+        ]
+    },
+    {
+        "keys": ["cut_entry"],
+        "command": "sendto_trash",
+        "context": [
+            { "key": "selector", "operator": "equal", "operand": "btlime.info" }
+        ]
+    },
+    {"keys": ["alt+a"], "command": "show_issue"},
+    {"keys": ["alt+s"], "command": "code_search"},
+    {"keys": ["alt+d"], "command": "find_forward"},
+    {"keys": ["alt+f"], "command": "find_first"},
+    {"keys": ["alt+c"], "command": "goto_defination"},
+    {"keys": ["alt+z"], "command": "recordto_review"},
+    {"keys": ["alt+x"], "command": "record to trace"}
 ]

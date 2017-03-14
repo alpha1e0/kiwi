@@ -1,10 +1,10 @@
 {
     "cache_directory_name": ".cache",
     // This setting-entry identify the color scheme of the analyse result.
-    "analyse_result_color_scheme": "Packages/bugtrack/bugtrack.hidden-tmTheme",
+    "analyse_result_color_scheme": "Packages/btlime/bugtrack.hidden-tmTheme",
 
     // This setting-entry identify whether or not to set read-only attribute for analyse result.
-    "analyse_result_read_only": true,
+    "analyse_result_read_only": false,
 
     "file_meta_identify": false
 }

@@ -1,0 +1,51 @@
+%YAML 1.2
+---
+
+#===============================================================================
+# Btlime, Security tool for auditing source code
+# Copyright (c) 2016 alpha1e0
+# -----------------------------------------------------------------------------
+# Issue defination for source.python
+#===============================================================================
+
+version: 1.0
+scope: source.python
+
+patterns:
+  - os.system
+  - os.popen
+  - os.popen2
+  - os.popen3
+  - os.popen4
+  - popen2.popen2
+  - popen2.popen3
+  - popen2.popen4
+  - popen2.Popen3
+  - popen2.Popen4
+  - commands.getoutput
+  - commands.getstatusoutput
+  - subprocess.call
+  - subprocess.Popen
+  - subprocess.check_call
+  - subprocess.check_output
+  - utils.execute
+  - utils.execute_with_timeout
+  - os.remove
+  - os.unlink
+  - os.rmdir
+  - os.removedirs
+  - shutil.rmtree
+  - pickle/cPickle
+  - pickle.load
+  - pickle.dump
+  - yaml.load
+  - yaml.dump
+  - eval
+  - eval_r
+  - exec
+  - execfile
+  - \["']select.+from
+  - \["']insert.+into
+  - \["']update.+set
+  - \["']drop
+  - \["']delete.+from

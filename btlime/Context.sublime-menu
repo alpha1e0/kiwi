@@ -1,0 +1,64 @@
+[
+    {
+        "caption": "Btlime",
+        "children":
+        [
+            {
+                "caption": "Jump To",
+                "command": "jump_location"
+
+            },
+            {
+                "caption": "Send to Trash",
+                "command": "sendto_trash"
+
+            },
+            {
+                "caption": "Send to Review",
+                "command": "sendto_review"
+
+            },
+            {
+                "caption": "Copy Entry",
+                "command": "copy_entry"
+
+            },
+            {
+                "caption": "Cut Entry",
+                "command": "cut_entry"
+
+            },
+            { "caption": "-" },
+            {
+                "caption": "Show/Hide Issues",
+                "command": "show_issue"
+
+            },
+            {
+                "caption": "Code Search",
+                "command": "code_search"
+
+            },
+            {
+                "caption": "Find Forward",
+                "command": "find_forward"
+
+            },
+            {
+                "caption": "Find First",
+                "command": "find_first"
+
+            },
+            {
+                "caption": "Record to Review",
+                "command": "recordto_review"
+
+            },
+            {
+                "caption": "Record to Trace",
+                "command": "recordto_trace"
+
+            },
+        ]
+    }
+]

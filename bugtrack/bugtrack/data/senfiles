@@ -2,20 +2,14 @@
 ---
 
 #===============================================================================
-# Bugtrack, a sublime plugin for finding security bugs.
+# Bugtrack, Security tool for auditing source code
 # Copyright (c) 2016 alpha1e0
 # -----------------------------------------------------------------------------
-# settings
+# Signature defines for intresting files
 #===============================================================================
 
+version: 1.0
 
-# Define the ignore files pattern
-ignores:
-  directories: 
-    - .git
-    - .svn
-    - cvs
-  extensions:
-    - pyc
-  files:
-    - .gitignore
+patterns:
+  - upload
+  - download
