@@ -1,4 +1,8 @@
 /tmp/*
 *.pyc
-/test.py
-/track.md
+test.py
+track.md
+/bugtrack/bugtrack.egg-info
+/bugtrack/dist
+/bugtrack/build
+.DS_Store

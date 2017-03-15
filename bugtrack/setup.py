@@ -15,34 +15,25 @@ from setuptools import setup, find_packages
 setup(
     name="bugtrack",
     version="1.0",
-    packages=find_packages(),
+    packages=find_packages()+['bugtrack.data.features.evals'],
+
+    include_package_data = True,
 
     install_requires=[
-        'yaml>=0.3',
-        'peewee'
+        'appdirs>=1.4.0',
+        'pyyaml>=3.11',
+        'colorama>=0.3.7'
     ],
 
-    package_data={
-        # If any package contains *.txt or *.rst files, include them:
-        '': ['*.txt', '*.rst'],
-        # And include any *.msg files found in the 'hello' package, too:
-        'hello': ['*.msg'],
-    },
-
-    # metadata for upload to PyPI
     author="alpha1e0",
     author_email="yan.shifm@foxmail.com",
     description="",
-    keywords="security hacking",
-    url="http://example.com/HelloWorld/",   # project home page, if any
-
-    # could also include long_description, download_url, classifiers, etc.
+    keywords="security hacking audit",
+    url="https://github.com/alpha1e0/bugtrack",
 
     entry_points = {
         'console_scripts': [
-            'rst2pdf = project_a.tools.pdfgen [reST]',
-            'rst2html = project_a.tools.htmlgen',
-            # more script entry points ...
+            'bugtrack = bugtrack.ui.cli.main:main',
         ],
     }
 )

@@ -1,0 +1,2 @@
+include bugtrack/data/*
+include bugtrack/data/features/*

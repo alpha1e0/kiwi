@@ -28,8 +28,8 @@
         ]
     },
     {
-        "keys": ["cut_entry"],
-        "command": "sendto_trash",
+        "keys": ["ctrl+r"],
+        "command": "cut_entry",
         "context": [
             { "key": "selector", "operator": "equal", "operand": "btlime.info" }
         ]

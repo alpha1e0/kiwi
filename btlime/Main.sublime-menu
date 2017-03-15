@@ -15,7 +15,28 @@
                         "command": "open_file",
                         "args": {"file": "${packages}/btlime/btlime.sublime-settings"},
                         "caption": "Main settings"
-                    }
+                    },
+                    {
+                        "command": "open_file",
+                        "args": {"file": "${packages}/btlime/Default.sublime-keymap"},
+                        "caption": "Key bindings"
+                    },
+                    { "caption": "-" },
+                    {
+                        "command": "open_file",
+                        "args": {"file": "${packages}/btlime/issuedef/python"},
+                        "caption": "Python issue-define"
+                    },
+                    {
+                        "command": "open_file",
+                        "args": {"file": "${packages}/btlime/issuedef/php"},
+                        "caption": "PHP issue-define"
+                    },
+                    {
+                        "command": "open_file",
+                        "args": {"file": "${packages}/btlime/issuedef/java"},
+                        "caption": "Java issue-define"
+                    },
                 ]
             },
             { "caption": "-" },

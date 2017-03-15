@@ -10,6 +10,7 @@ Copyright (c) 2016 alpha1e0
 import os
 import re
 import yaml
+import threading
 
 import sublime
 import sublime_plugin
@@ -56,16 +57,37 @@ class Dict(dict):
         self[key] = value
 
 
-class Path(Dict):
-    def __init__(self):
-        pkgpath = sublime.packages_path()
-        btlimepath = os.path.join(pkgpath, "btlime") 
 
-        self['package'] = pkgpath
-        self['btlime'] = btlimepath
-        self['issuedef'] = os.path.join(btlimepath, 'issuedef')
+def run_in_thread(wait=True):
+    '''
+    @params:
+        wait: [True|False|timeout]，进程是否等待线程结束
+    @returns:
+        返回Queue.Queue
+    '''
+    def _wrapper(func):
+        @functools.wraps(func)
+        def threadFunc(*args, **kwargs):
+            def run(queue, *args, **kwargs):
+                ret = func(*args, **kwargs)
+                queue.put(ret)
 
-path = Path()
+            queue = Queue.Queue()
+
+            thread = threading.Thread(target=run, args=(queue, args), 
+                kwargs=kwargs)
+
+            thread.start()
+
+            if wait is True:
+                thread.join()
+            elif isinstance(wait, float):
+                thread.join(wait)
+
+            return queue
+
+        return threadFunc
+    return _wrapper
 
 
 
@@ -135,7 +157,16 @@ class current(object):
 
 class RunBugtrackCommand(sublime_plugin.TextCommand):
     def run(self, edit, **args):
-        return
+        proj_dir = args['dirs'][0]
+
+        settings = sublime.load_settings('bugtrack.sublime-settings')
+        btcmd = settings.get("bugtrack_command", "bugtrack")
+        cachedir = settings.get("cache_directory_name", ".btlime-cache")
+        
+        self.run_bugtrack(btcmd, cachedir)
+
+    def _run_bugtrack(self, btcmd, cachedir):
+        pass
 
 
 
@@ -214,18 +245,32 @@ class ShowIssueCommand(sublime_plugin.TextCommand):
         else:
             return None
 
+    def _load_patterns(self):
+        result = []
+        config = self._load_config()
+        if config:
+            default_patterns = config.get('default-patterns',[])
+            user_patterns = config.get('user-patterns',[])
+            if isinstance(default_patterns, list):
+                result = result + default_patterns
+            if isinstance(user_patterns, list):
+                result = result + user_patterns
+
+        return result
+
 
     def _get_issue_regions(self):
-        config = self._load_config()
-        if not config:
-            return []
+        str_patterns = self._load_patterns()
 
         result = []
-        patterns = [re.compile(p) for p in config['patterns']]
+        patterns = [re.compile(p) for p in str_patterns]
         content = current.filecontent(self.view)
 
         for pattern in patterns:
             for match in pattern.finditer(content):
+                if self.view.match_selector(match.start(), "comment"):
+                    continue
+
                 result.append(sublime.Region(match.start(),match.end()))
 
         return result
