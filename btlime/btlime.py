@@ -10,7 +10,9 @@ Copyright (c) 2016 alpha1e0
 import os
 import re
 import yaml
+import time
 import threading
+import subprocess
 
 import sublime
 import sublime_plugin
@@ -58,36 +60,15 @@ class Dict(dict):
 
 
 
-def run_in_thread(wait=True):
-    '''
-    @params:
-        wait: [True|False|timeout]，进程是否等待线程结束
-    @returns:
-        返回Queue.Queue
-    '''
-    def _wrapper(func):
-        @functools.wraps(func)
-        def threadFunc(*args, **kwargs):
-            def run(queue, *args, **kwargs):
-                ret = func(*args, **kwargs)
-                queue.put(ret)
+def run_in_thread(func):
+    def thread_func(*args, **kwargs):
+        def run():
+            r = func(*args, **kwargs)
 
-            queue = Queue.Queue()
+        t = threading.Thread(target=run)
+        t.start()
 
-            thread = threading.Thread(target=run, args=(queue, args), 
-                kwargs=kwargs)
-
-            thread.start()
-
-            if wait is True:
-                thread.join()
-            elif isinstance(wait, float):
-                thread.join(wait)
-
-            return queue
-
-        return threadFunc
-    return _wrapper
+    return thread_func
 
 
 
@@ -157,16 +138,44 @@ class current(object):
 
 class RunBugtrackCommand(sublime_plugin.TextCommand):
     def run(self, edit, **args):
-        proj_dir = args['dirs'][0]
+        projdir = args['dirs'][0]
 
-        settings = sublime.load_settings('bugtrack.sublime-settings')
+        settings = sublime.load_settings('btlime.sublime-settings')
         btcmd = settings.get("bugtrack_command", "bugtrack")
         cachedir = settings.get("cache_directory_name", ".btlime-cache")
+        cachedir = os.path.join(projdir, cachedir)
         
-        self.run_bugtrack(btcmd, cachedir)
+        self._run_bugtrack(btcmd, projdir, cachedir)
 
-    def _run_bugtrack(self, btcmd, cachedir):
-        pass
+
+    @run_in_thread
+    def _run_bugtrack(self, btcmd, projdir, cachedir):
+        projname = os.path.split(projdir)[-1]
+        cachename = os.path.split(cachedir)[-1]
+        result_file = os.path.join(cachedir, projname+".bugtrack")
+
+        if not os.path.exists(cachedir):
+            os.mkdir(cachedir)
+
+        cmd = [btcmd, projdir, "--exclude", cachename,
+            "-o", result_file]
+        cmd = " ".join(cmd)
+
+        self.show_message("Running bugtrack ...")
+
+        try:
+            output = subprocess.check_output(cmd, shell=True)
+        except Exception as error:
+            sublime.error_message(str(error))
+            return
+
+        self.show_message("Bugtrack scan finished.")
+
+        self.view.window().open_file(result_file)
+
+
+    def show_message(self, msg):
+        self.view.window().status_message(str(msg))
 
 
 

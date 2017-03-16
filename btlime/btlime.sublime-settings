@@ -1,4 +1,4 @@
 {
     "cache_directory_name": ".btlime-cache",
-    "bugtrack_command": "/Users/apple/pentest/bugtrack/bugtrack/bugtrack.py"
+    "bugtrack_command": "/usr/local/bin/bugtrack"
 }
