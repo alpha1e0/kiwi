@@ -49,7 +49,7 @@ class Issue(dict):
 
 
     def totext(self):
-        template = ("--------------------------------\n"
+        template = (
             "[{id}:{name}]\n"
             "<Match:{pattern}> <Severity:{severity}> "
             "<Confidence:{confidence}>\n"

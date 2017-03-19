@@ -56,15 +56,15 @@ class TextReporter(Reporter):
                 directory = directory,
                 time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
 
-        senfiles = "="*80 + "\nFound sensitive files as follows:\n\n"
+        senfiles = "-"*80 + "\nFound sensitive files as follows:\n\n"
         for filename in issuemgr.senfiles:
             senfiles = senfiles + "@" + filename + "\n"
 
-        issues = "="*80 + "\nFound security issues as follows:\n\n"
+        issues = "-"*80 + "\nFound security issues as follows:\n\n"
         for issue in issuemgr:
             issues = issues + issue.totext()
 
-        statistics = "="*80 + "\nStatistics information:\n"
+        statistics = "-"*80 + "\nStatistics information:\n"
         sinfo = issuemgr.statistics()
         for s in sinfo:
             statistics = statistics + \

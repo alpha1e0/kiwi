@@ -119,7 +119,7 @@ class current(object):
 
 
     @classmethod
-    def basepath(cls, view):
+    def filepath(cls, view):
         return os.path.dirname(view.file_name())
 
 
@@ -133,6 +133,199 @@ class current(object):
         return os.path.dirname(__file__)
 
 
+    @classmethod
+    def result_entry(cls, view):
+        pass
+
+
+    @classmethod
+    def result_fileloc(cls, view):
+        pass
+
+
+def is_btlime_info(veiw):
+    return view.match_selector(current.point(view), "btlime.info")
+
+
+def get_line(view, point):
+    '''
+    Get the line from view:point
+    @returns:
+        (line_content, line_region, line_left_point)
+        note that, the line_content dose not contains newline character, but
+            the line_region contains
+    '''
+    region = view.full_line(point)
+    content = view.substr(region)
+
+    return content.rstrip("\n"), region, region.a
+
+
+def _match_line_number(line):
+    line_number_pattern = re.compile(r"^(\d+)[-:]")
+    match = line_number_pattern.match(line)
+  
+    return int(match.group(1)) if match else None
+
+def _match_file_name(line):
+    file_name_pattern = re.compile(r"^@(.+)")
+    match = file_name_pattern.match(line)
+
+    return match.group(1) if match else None
+
+
+def get_file_location(view, point):
+    '''
+    Get the file location from the btlime info entry.
+        For example:
+            @/aaa/bbb/xxx.py
+            23- for i in range(100)
+            24:     i = i**2
+            25-     print i
+        will get the file location: /aaa/bbb/xxx.py:24
+    '''
+    line_content, _, line_point = get_line(view, point)
+
+    file_name = _match_file_name(line_content)
+    if file_name:
+        return "{0}:{1}".format(file_name, 0)
+
+    lineno = _match_line_number(line_content)
+    if not lineno:
+        return None
+
+    current_point = line_point-1
+    while current_point >= 0:
+        line_content, _, line_point = get_line(view, current_point)
+
+        file_name = _match_file_name(line_content)
+        if not file_name:
+            current_point = line_point-1
+            print(current_point, line_content)
+            continue
+        else:
+            return "{0}:{1}".format(file_name, lineno)
+
+
+def get_info_entry(veiw, point):
+    '''
+    Get the btlime info entry from the btlime info entry.
+    @returns:
+        The entry string, For example:
+            <Match:i**2>
+            @/aaa/bbb/xxx.py
+            23- for i in range(100)
+            24:     i = i**2
+            25-     print i
+        will get the file location: /aaa/bbb/xxx.py:24
+    '''
+    result = ""
+    line_content, line_region, line_point = get_line(view, point)
+
+    before = []
+    current_point = line_point - 1
+    while current_point >= 0:
+        current_content, _, current_point = get_line(view, current_point)
+        # if meet blank line break
+        if not current_point:
+            break
+
+        before.insert(0, current_content)
+
+    before_point = current_point
+
+    after = []
+    current_point = line_point + 1
+    while current_point < view.size():
+        current_content, current_region, current_point = \
+            get_line(view, current_point)
+        # if meet blank line break
+        if not current_point:
+            break
+
+        after.append(current_content)
+
+    after_point = current_region.b + 1
+
+    result = "\n".join(before) + (line_content+"\n") + "\n".join(after)
+
+    return result, Region(before_point, after_point)
+
+
+
+def get_code_context(view, point, ctxs=2):
+    row = lambda p: view.rowcol(p)[0]
+
+    line_content, line_region, line_point = get_line(view, point)
+
+    word = view.word(point)
+    rowno = row(line_point)
+    context = [(rowno, line_content)]
+
+    for i in range(ctxs):
+        current_point = line_point - 1
+        current_content, _, current_point = get_line(view, current_point)
+        context.insert(0, (row(current_point), current_content))
+
+    for i in range(ctxs):
+        current_point = current_region.b + 1
+        current_content, current_region, _ = get_line(view, current_point)
+        context.append((row(current_point), current_content))
+
+    return context, rowno, word
+
+
+def get_formated_code_context(view, point, ctxs=2):
+    context = get_code_context(view, point, ctxs)
+
+    result = "<Match:{0}>\n".format(context[2])
+
+    no_fmt = "{0:>" + str(len(str(largest_lineno))) + "}"
+    fmt = "{lineno}{spliter} {content}\n"
+
+    for line in context[0]:
+        spliter = "-" if line[0]!=context[1] else ":"
+        result = result + fmt.format(lineno = no_fmt(line[0]),
+            spliter = spliter,
+            content = line[1])
+
+    return result + "\n"
+
+
+
+def load_patterns(scope):
+    if 'source.python' in scope:
+        idfile = os.path.join(current.pkgpath(), 'issuedef', "python")
+    elif 'source.java' in scope:
+        idfile = os.path.join(current.pkgpath(), 'issuedef', "java")
+    elif 'source.php' in scope:
+        idfile = os.path.join(current.pkgpath(), 'issuedef', "php")
+    else:
+        idfile = None
+
+    if idfile:
+        config = YamlConf(idfile)
+    else:
+        return None
+
+    patterns = []
+    if config:
+        default_patterns = config.get('default-patterns',[])
+        user_patterns = config.get('user-patterns',[])
+        if isinstance(default_patterns, list):
+            for pattern in default_patterns:
+                patterns.append(re.compile(pattern))
+
+        if isinstance(user_patterns, list):
+            for pattern in user_patterns:
+                patterns.append(re.compile(pattern))
+
+    return patterns
+
+
+
+class SimpleAnalyzer(object):
+    pass
 
 
 
@@ -196,7 +389,18 @@ class GlobalCodeSearchCommand(sublime_plugin.TextCommand):
 
 class JumpLocationCommand(sublime_plugin.TextCommand):
     def run(self, edit, **args):
-        return
+        point = current.point(self.view)
+
+        file_loc = get_file_location(self.view, point)
+        if not file_loc:
+            return None
+
+        file_name = file_loc.split(":")[0]
+        if os.path.exists(file_name):
+            self.view.window().open_file(file_loc, sublime.ENCODED_POSITION)
+        else:
+            sublime.error_message("File '{0}'' doses not exists.".format(
+                file_name))
 
 
 
@@ -239,40 +443,12 @@ class ShowIssueCommand(sublime_plugin.TextCommand):
             self.view.add_regions(self.ISSUEKEY, regions, self.ISSUESCOPE)
 
 
-    def _load_config(self):
-        if 'source.python' in current.scope(self.view):
-            idfile = os.path.join(current.pkgpath(), 'issuedef', "python")
-        elif 'source.java' in current.scope(self.view):
-            idfile = os.path.join(current.pkgpath(), 'issuedef', "java")
-        elif 'source.php' in current.scope(self.view):
-            idfile = os.path.join(current.pkgpath(), 'issuedef', "php")
-        else:
-            idfile = None
-
-        if idfile:
-            return YamlConf(idfile)
-        else:
-            return None
-
-    def _load_patterns(self):
-        result = []
-        config = self._load_config()
-        if config:
-            default_patterns = config.get('default-patterns',[])
-            user_patterns = config.get('user-patterns',[])
-            if isinstance(default_patterns, list):
-                result = result + default_patterns
-            if isinstance(user_patterns, list):
-                result = result + user_patterns
-
-        return result
-
 
     def _get_issue_regions(self):
-        str_patterns = self._load_patterns()
-
         result = []
-        patterns = [re.compile(p) for p in str_patterns]
+
+        scope = current.scope(self.view)
+        patterns = load_patterns(scope)
         content = current.filecontent(self.view)
 
         for pattern in patterns:
@@ -284,7 +460,6 @@ class ShowIssueCommand(sublime_plugin.TextCommand):
 
         return result
 
-        
 
 
 

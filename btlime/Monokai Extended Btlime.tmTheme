@@ -995,7 +995,7 @@
 
         <dict>
             <key>scope</key>
-            <string>bugtrack.separator</string>
+            <string>btlime.separator</string>
             <key>settings</key>
             <dict>
                 <key>background</key>
@@ -1008,7 +1008,7 @@
         </dict>
         <dict>
             <key>scope</key>
-            <string>bugtrack.scaninfo.project</string>
+            <string>btlime.scaninfo.project</string>
             <key>settings</key>
             <dict>
                 <key>fontStyle</key>
@@ -1099,10 +1099,8 @@
             <string>btlime.level.high</string>
             <key>settings</key>
             <dict>
-                <key>fontStyle</key>
-                <string></string>
                 <key>foreground</key>
-                <string>#FD971F</string>
+                <string>#F92672</string>
             </dict>
         </dict>
         <dict>
@@ -1136,7 +1134,16 @@
         </dict>
         <dict>
             <key>scope</key>
-            <string>btlime.comment btlime.banner</string>
+            <string>btlime.banner</string>
+            <key>settings</key>
+            <dict>
+                <key>foreground</key>
+                <string>#75715E</string>
+            </dict>
+        </dict>
+        <dict>
+            <key>scope</key>
+            <string>btlime.comment</string>
             <key>settings</key>
             <dict>
                 <key>foreground</key>
