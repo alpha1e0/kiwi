@@ -1,34 +1,34 @@
 [
     {
-        "keys": ["ctrl+z"],
+        "keys": ["ctrl+1"],
         "command": "jump_location",
         "context": [
             { "key": "selector", "operator": "equal", "operand": "btlime.info" }
         ]
     },
     {
-        "keys": ["ctrl+q"],
+        "keys": ["ctrl+2"],
         "command": "sendto_trash",
         "context": [
             { "key": "selector", "operator": "equal", "operand": "btlime.info" }
         ]
     },
     {
-        "keys": ["ctrl+w"],
+        "keys": ["ctrl+3"],
         "command": "sendto_review",
         "context": [
             { "key": "selector", "operator": "equal", "operand": "btlime.info" }
         ]
     },
     {
-        "keys": ["ctrl+e"],
+        "keys": ["ctrl+4"],
         "command": "copy_entry",
         "context": [
             { "key": "selector", "operator": "equal", "operand": "btlime.info" }
         ]
     },
     {
-        "keys": ["ctrl+r"],
+        "keys": ["ctrl+5"],
         "command": "cut_entry",
         "context": [
             { "key": "selector", "operator": "equal", "operand": "btlime.info" }
@@ -40,5 +40,10 @@
     {"keys": ["alt+f"], "command": "find_first"},
     {"keys": ["alt+c"], "command": "goto_defination"},
     {"keys": ["alt+z"], "command": "recordto_review"},
-    {"keys": ["alt+x"], "command": "record to trace"}
+    {"keys": ["alt+x"], "command": "record to trace"},
+    { "keys": ["escape"], "command": "clean_findings", "context":
+        [
+            { "key": "setting.is_finding", "operator": "equal", "operand": true }
+        ]
+    },
 ]

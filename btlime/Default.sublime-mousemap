@@ -1,7 +1,3 @@
 [
-    {
-        "button": "button1",
-        "count": 2,
-        "press_command": "jump_location"
-    }
+
 ]

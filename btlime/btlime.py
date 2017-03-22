@@ -143,7 +143,7 @@ class current(object):
         pass
 
 
-def is_btlime_info(veiw):
+def is_btlime_info(view):
     return view.match_selector(current.point(view), "btlime.info")
 
 
@@ -207,7 +207,7 @@ def get_file_location(view, point):
             return "{0}:{1}".format(file_name, lineno)
 
 
-def get_info_entry(veiw, point):
+def get_info_entry(view, point):
     '''
     Get the btlime info entry from the btlime info entry.
     @returns:
@@ -431,17 +431,17 @@ class CutEntryCommand(sublime_plugin.TextCommand):
 
 
 class ShowIssueCommand(sublime_plugin.TextCommand):
-    ISSUEKEY = "btlime-issue"
-    ISSUESCOPE = "invalid.illegal"
+    ISSUE_KEY = "btlime-issue"
+    ISSUES_COPE = "invalid.illegal"
 
     def run(self, edit, **args):
-        if self.view.get_regions(self.ISSUEKEY):
-            self.view.erase_regions(self.ISSUEKEY)
+        if self.view.get_regions(self.ISSUE_KEY):
+            self.view.erase_regions(self.ISSUE_KEY)
             return
         else:
             regions = self._get_issue_regions()
-            self.view.add_regions(self.ISSUEKEY, regions, self.ISSUESCOPE)
-
+            self.view.add_regions(self.ISSUE_KEY, regions, self.ISSUES_COPE)
+            self.view.show(regions[0])
 
 
     def _get_issue_regions(self):
@@ -464,13 +464,106 @@ class ShowIssueCommand(sublime_plugin.TextCommand):
 
 
 class FindForwardCommand(sublime_plugin.TextCommand):
+    FINDING_KEY = "finding"
+    FINDING_SCOPE = "invalid.deprecated"
+
     def run(self, edit, **args):
-        return
+        if not self._is_finding:
+            current_region = self.view.word(self.view.sel()[0])
+            self._draw_regions([current_region])
+            self.view.settings().set("is_finding", True)
+
+        all_match_regions = self.view.find_all(self._match_word)
+
+        pre_regions = self._get_pre_regions(self._current_regions, 
+            all_match_regions)
+        self.view.show(pre_regions[0])
+
+        self._draw_regions(pre_regions)
+
+
+    def _get_pre_regions(self, cregions, aregions):
+        if len(cregions) == len(aregions):
+            return cregions
+
+        pos = len(aregions)-1
+        for i in range(len(aregions)-1):
+            if aregions[i+1] == cregions[0]:
+                pos = i
+
+        return aregions[pos:]
+
+
+    def _draw_regions(self, regions):
+        self.view.add_regions(self.FINDING_KEY, regions, self.FINDING_SCOPE)
+
+
+    @property
+    def _match_word(self):
+        if not self._is_finding:
+            word = current.word(self.view)
+        else:
+            word_region = self._current_regions[0]
+            word = self.view.substr(word_region)
+
+        return word
+
+
+    @property
+    def _current_regions(self):
+        return self.view.get_regions(self.FINDING_KEY)
+
+
+    @property
+    def _is_finding(self):
+        return True if self.view.get_regions(self.FINDING_KEY) else False
+
+
+
+class CleanFindingsCommand(sublime_plugin.TextCommand):
+    def run(self, edit, **args):
+        self.view.erase_regions(FindForwardCommand.FINDING_KEY)
+        self.view.settings().set("is_finding", False)
+
 
 
 class FindFirstCommand(sublime_plugin.TextCommand):
+    FINDING_KEY = "finding"
+    FINDING_SCOPE = "invalid.deprecated"
+
     def run(self, edit, **args):
-        return
+        if not self._is_finding:
+            current_region = self.view.word(self.view.sel()[0])
+            current_word = current.word(self.view)
+            first_region = self.view.find(current_word, 0)
+
+            self._draw_regions([current_region, first_region])
+            
+            self.view.settings().set("is_finding", True)
+            self.view.show(first_region)
+
+            return
+
+        visible_region = self.view.visible_region()
+        for region in self._match_regions:
+            if not visible_region.contains(region):
+                self.view.show(region)
+                return
+
+
+
+    def _draw_regions(self, regions):
+        self.view.add_regions(self.FINDING_KEY, regions, self.FINDING_SCOPE)
+
+
+    @property
+    def _match_regions(self):
+        return self.view.get_regions(self.FINDING_KEY)
+
+
+    @property
+    def _is_finding(self):
+        return True if self.view.get_regions(self.FINDING_KEY) else False
 
 
 

@@ -50,6 +50,11 @@
 
             },
             {
+                "caption": "Clean Findings",
+                "command": "clean_findings"
+
+            },
+            {
                 "caption": "Record to Review",
                 "command": "recordto_review"
 

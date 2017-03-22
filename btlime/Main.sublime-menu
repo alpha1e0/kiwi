@@ -105,6 +105,13 @@
 
             },
             {
+                "caption": "Clean Findings",
+                "mnemonic": "E",
+                "id": "clean-findings",
+                "command": "clean_findings"
+
+            },
+            {
                 "caption": "Record to Review",
                 "mnemonic": "R",
                 "id": "recordto-review",
