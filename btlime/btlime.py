@@ -19,6 +19,10 @@ import sublime_plugin
 
 
 
+BTLIME_SETTING_FILE = 'btlime.sublime-settings'
+BTLIME_SYNTAX_FILE = "Packages/btlime/btlime.sublime-syntax"
+
+
 class FileError(Exception):
     pass
 
@@ -105,7 +109,7 @@ class current(object):
 
 
     @classmethod
-    def projectpath(cls, view):
+    def projectdir(cls, view):
         window = view.window()
 
         for folder in window.folders():
@@ -141,6 +145,14 @@ class current(object):
     @classmethod
     def result_fileloc(cls, view):
         pass
+
+
+def error(msg):
+    sublime.error_message(str(msg))
+
+
+def status(msg):
+    sublime.active_window().status_message(str(msg))
 
 
 def is_btlime_info(view):
@@ -294,19 +306,23 @@ def get_formated_code_context(view, point, ctxs=2):
 
 
 def load_patterns(scope):
-    if 'source.python' in scope:
-        idfile = os.path.join(current.pkgpath(), 'issuedef', "python")
-    elif 'source.java' in scope:
-        idfile = os.path.join(current.pkgpath(), 'issuedef', "java")
-    elif 'source.php' in scope:
-        idfile = os.path.join(current.pkgpath(), 'issuedef', "php")
+    settings = sublime.load_settings(BTLIME_SETTING_FILE)
+    issuedef = settings.get("issuedef", None)
+    if not issuedef:
+        return []
+
+    for entry in issuedef:
+        if entry['scope'] in scope:
+            idfile = os.path.join(current.pkgpath(), 'issuedef', 
+                entry['filename'])
+            break
     else:
         idfile = None
 
     if idfile:
         config = YamlConf(idfile)
     else:
-        return None
+        return []
 
     patterns = []
     if config:
@@ -323,9 +339,136 @@ def load_patterns(scope):
     return patterns
 
 
+def run_cmd(cmd):
+    if isinstance(cmd, list):
+        cmd = [str(c) for c in cmd]
+        cmd = " ".join(cmd)
 
-class SimpleAnalyzer(object):
-    pass
+    output = ""
+    try:
+        output = subprocess.check_output(cmd, shell=True)
+    except Exception as error:
+        error(str(error))
+
+    return output
+
+
+def search(patterns, directories, includes, excludes):
+    settings = sublime.load_settings(BTLIME_SETTING_FILE)
+    ptcmd = settings.get("code_search_command")
+    if ptcmd:
+        return pt_search(ptcmd, patterns, directories, includes, excludes)
+    else:
+        return simple_search(patterns, directories, includes, exculdes)
+
+
+def _build_pt_command(ptcmd, pattern, directory, ctxs):
+    if sublime.platform() == 'windows':
+        ctxs_lable = "/C"
+    else:
+        ctxs_lable = "-C"
+
+    return [ptcmd, pattern, directory, ctxs_lable, ctxs]
+
+
+def _format_pt_result(ptresult, pattern):
+    result = ""
+
+    entry = ""
+    current_file = ""
+
+    lines = ptresult.decode().split("\n")
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+
+        sp = line.split(":")
+        filename = sp[0]
+
+        if sp[1].isdigit():
+            lineno = sp[1] + ": "
+            content = ":".join(sp[2:])
+        else:
+            sp2 = ":".join(sp[1:]).split("-")
+            lineno = sp2[0] + "- "
+            content = "-".join(sp2[1:])
+
+        if current_file != filename:
+            current_file = filename
+            result = result + "\n" + entry
+            entry = "<Match:{0}>\n".format(pattern)
+            entry = entry + "@{0}\n".format(current_file)
+
+        entry = entry + lineno + content + "\n"
+
+    result = result + "\n" + entry
+
+    return result
+
+
+
+def pt_search(ptcmd, patterns, directories, includes, excludes):
+    settings = sublime.load_settings(BTLIME_SETTING_FILE)
+    ctxs = settings.get("result_context", 2)
+
+    search_result = ""
+    for pattern in patterns:
+        for directory in directories:
+            cmd = _build_pt_command(ptcmd, pattern, directory, ctxs)
+            #cmd = "pt eval /Users/apple/tmp/proja -C 2 | cat"
+            pt_output = run_cmd(cmd)
+            search_result = search_result + "\n" + _format_pt_result(pt_output,
+                pattern)
+
+    return "#!btlime" + search_result
+
+
+
+def simple_search(patterns, directories, includes, exculdes):
+    error("Can not find code search tool 'pt',"
+        " and simple mode is not support now")
+
+
+
+def analyze(view, btcmd, projdir, cachedir):
+    if btcmd:
+        bt_analyze(view, btcmd, projdir, cachedir)
+    else:
+        simple_analyze(view, projdir, cachedir)
+
+
+@run_in_thread
+def bt_analyze(view, btcmd, projdir, cachedir):
+    projname = os.path.split(projdir)[-1]
+    cachename = os.path.split(cachedir)[-1]
+    result_file = os.path.join(cachedir, projname+".bugtrack")
+
+    if not os.path.exists(cachedir):
+        os.mkdir(cachedir)
+
+    cmd = [btcmd, projdir, "--exclude", cachename,
+        "-o", result_file]
+    cmd = " ".join(cmd)
+
+    status("Running bugtrack ...")
+
+    try:
+        output = subprocess.check_output(cmd, shell=True)
+    except Exception as error:
+        error(str(error))
+        return
+
+    status("Bugtrack scan finished.")
+
+    view.window().open_file(result_file)
+
+
+@run_in_thread
+def simple_analyze(view, projdir, cachedir):
+    error("Can not find code search tool 'bugtrack',"
+        " and simple mode is not support now")
+
 
 
 
@@ -333,12 +476,12 @@ class RunBugtrackCommand(sublime_plugin.TextCommand):
     def run(self, edit, **args):
         projdir = args['dirs'][0]
 
-        settings = sublime.load_settings('btlime.sublime-settings')
-        btcmd = settings.get("bugtrack_command", "bugtrack")
+        settings = sublime.load_settings(BTLIME_SETTING_FILE)
+        btcmd = settings.get("bugtrack_command", None)
         cachedir = settings.get("cache_directory_name", ".btlime-cache")
         cachedir = os.path.join(projdir, cachedir)
         
-        self._run_bugtrack(btcmd, projdir, cachedir)
+        analyze(self.view, btcmd, projdir, cachedir)
 
 
     @run_in_thread
@@ -359,16 +502,12 @@ class RunBugtrackCommand(sublime_plugin.TextCommand):
         try:
             output = subprocess.check_output(cmd, shell=True)
         except Exception as error:
-            sublime.error_message(str(error))
+            error(str(error))
             return
 
         self.show_message("Bugtrack scan finished.")
 
         self.view.window().open_file(result_file)
-
-
-    def show_message(self, msg):
-        self.view.window().status_message(str(msg))
 
 
 
@@ -399,7 +538,7 @@ class JumpLocationCommand(sublime_plugin.TextCommand):
         if os.path.exists(file_name):
             self.view.window().open_file(file_loc, sublime.ENCODED_POSITION)
         else:
-            sublime.error_message("File '{0}'' doses not exists.".format(
+            error("File '{0}'' doses not exists.".format(
                 file_name))
 
 
@@ -551,7 +690,6 @@ class FindFirstCommand(sublime_plugin.TextCommand):
                 return
 
 
-
     def _draw_regions(self, regions):
         self.view.add_regions(self.FINDING_KEY, regions, self.FINDING_SCOPE)
 
@@ -581,7 +719,15 @@ class RecordtoTraceCommand(sublime_plugin.TextCommand):
 
 class CodeSearchCommand(sublime_plugin.TextCommand):
     def run(self, edit, **args):
-        return
+        word = current.word(self.view)
+        directory = current.projectdir(self.view)
+
+        search_result = search([word], [directory], None, None)
+
+        view = self.view.window().new_file()
+        view.insert(edit, 0, search_result)
+        view.set_name("search {0}".format(word))
+        view.set_syntax_file(BTLIME_SYNTAX_FILE)
 
 
 

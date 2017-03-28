@@ -4,9 +4,8 @@
 name: btlime
 file_extensions:
   - bugtrack
-first_line_match: "^#!btlime"
+first_line_match: ^#!btlime
 scope: btlime.info
-hidden: true
 
 contexts:
   main:
