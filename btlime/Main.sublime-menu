@@ -1,13 +1,11 @@
 [
     {
         "caption": "Btlime",
-        "mnemonic": "B",
         "id": "btlime",
         "children":
         [
             {
                 "caption": "Btlime Settings",
-                "mnemonic": "S",
                 "id": "btlime-settings",
                 "children":
                 [
@@ -21,106 +19,71 @@
                         "args": {"file": "${packages}/btlime/Default.sublime-keymap"},
                         "caption": "Key bindings"
                     },
-                    { "caption": "-" },
                     {
-                        "command": "open_file",
-                        "args": {"file": "${packages}/btlime/issuedef/python"},
-                        "caption": "Python issue-define"
-                    },
-                    {
-                        "command": "open_file",
-                        "args": {"file": "${packages}/btlime/issuedef/php"},
-                        "caption": "PHP issue-define"
-                    },
-                    {
-                        "command": "open_file",
-                        "args": {"file": "${packages}/btlime/issuedef/java"},
-                        "caption": "Java issue-define"
+                        "command": "open_issue_def",
+                        "caption": "Issue defines"
                     },
                 ]
             },
             { "caption": "-" },
             {
-                "caption": "Jump To",
-                "mnemonic": "J",
+                "caption": "Jump To",   
                 "id": "jump-location",
                 "command": "jump_location"
 
             },
             {
                 "caption": "Send to Trash",
-                "mnemonic": "T",
                 "id": "sendto-trash",
                 "command": "sendto_trash"
 
             },
             {
                 "caption": "Send to Review",
-                "mnemonic": "R",
                 "id": "sendto-review",
                 "command": "sendto_review"
-
-            },
-            {
-                "caption": "Copy Entry",
-                "mnemonic": "C",
-                "id": "copy-entry",
-                "command": "copy_entry"
-
-            },
-            {
-                "caption": "Cut Entry",
-                "mnemonic": "c",
-                "id": "cut-entry",
-                "command": "cut_entry"
 
             },
             { "caption": "-" },
             {
                 "caption": "Show/Hide Issues",
-                "mnemonic": "H",
                 "id": "show-issue",
                 "command": "show_issue"
 
             },
             {
                 "caption": "Code Search",
-                "mnemonic": "s",
+    
                 "id": "code-search",
                 "command": "code_search"
 
             },
             {
                 "caption": "Find Forward",
-                "mnemonic": "F",
                 "id": "find-forward",
                 "command": "find_forward"
 
             },
             {
                 "caption": "Find First",
-                "mnemonic": "I",
                 "id": "find-first",
                 "command": "find_first"
 
             },
             {
                 "caption": "Clean Findings",
-                "mnemonic": "E",
                 "id": "clean-findings",
                 "command": "clean_findings"
 
             },
             {
                 "caption": "Record to Review",
-                "mnemonic": "R",
                 "id": "recordto-review",
                 "command": "recordto_review"
 
             },
             {
                 "caption": "Record to Trace",
-                "mnemonic": "r",
                 "id": "recordto-trace",
                 "command": "recordto_trace"
 

@@ -20,20 +20,6 @@
             { "key": "selector", "operator": "equal", "operand": "btlime.info" }
         ]
     },
-    {
-        "keys": ["ctrl+4"],
-        "command": "copy_entry",
-        "context": [
-            { "key": "selector", "operator": "equal", "operand": "btlime.info" }
-        ]
-    },
-    {
-        "keys": ["ctrl+5"],
-        "command": "cut_entry",
-        "context": [
-            { "key": "selector", "operator": "equal", "operand": "btlime.info" }
-        ]
-    },
     {"keys": ["alt+a"], "command": "show_issue"},
     {"keys": ["alt+s"], "command": "code_search"},
     {"keys": ["alt+d"], "command": "find_forward"},

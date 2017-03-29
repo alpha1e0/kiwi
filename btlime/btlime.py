@@ -377,22 +377,24 @@ def _format_pt_result(ptresult, pattern):
     entry = ""
     current_file = ""
 
-    lines = ptresult.decode().split("\n")
+    line_pattern = re.compile(r"^(.+):(\d+[:-])(.*)$")
+
+    if isinstance(ptresult, bytes):
+        lines = ptresult.decode().split("\n")
+    else:
+        lines = ptresult.split("\n")
+        
     for line in lines:
         line = line.strip()
         if not line:
             continue
 
-        sp = line.split(":")
-        filename = sp[0]
+        match = line_pattern.match(line)
+        if not match:
+            continue
 
-        if sp[1].isdigit():
-            lineno = sp[1] + ": "
-            content = ":".join(sp[2:])
-        else:
-            sp2 = ":".join(sp[1:]).split("-")
-            lineno = sp2[0] + "- "
-            content = "-".join(sp2[1:])
+        filename, lineno, content = match.group(1), \
+            match.group(2), " {0}".format(match.group(3))
 
         if current_file != filename:
             current_file = filename
@@ -436,6 +438,27 @@ def analyze(view, btcmd, projdir, cachedir):
         bt_analyze(view, btcmd, projdir, cachedir)
     else:
         simple_analyze(view, projdir, cachedir)
+
+    trace_file = os.path.join(cachedir, "trace")
+    review_file = os.path.join(cachedir, "review")
+    trash_file = os.path.join(cachedir, "trash")
+
+
+    header = "#!btlime\n\n"
+    if not os.path.exists(trace_file):
+        with open(trace_file, 'w') as _file:
+            _file.write(header + \
+                "# Record the trace information for code review.\n\n")
+
+    if not os.path.exists(review_file):
+        with open(review_file, 'w') as _file:
+            _file.write(header + \
+                "# Record the review information.\n\n")
+
+    if not os.path.exists(trash_file):
+        with open(trash_file, 'w') as _file:
+            _file.write(header + \
+                "# Trash file\n\n")
 
 
 @run_in_thread
@@ -511,12 +534,6 @@ class RunBugtrackCommand(sublime_plugin.TextCommand):
 
 
 
-class ConfigBugtrackCommand(sublime_plugin.TextCommand):
-    def run(self, edit, **args):
-        return
-
-
-
 class GlobalCodeSearchCommand(sublime_plugin.TextCommand):
     def run(self, edit, **args):
         return
@@ -550,18 +567,6 @@ class SendtoTrashCommand(sublime_plugin.TextCommand):
 
 
 class SendtoReviewCommand(sublime_plugin.TextCommand):
-    def run(self, edit, **args):
-        return
-
-
-
-class CopyEntryCommand(sublime_plugin.TextCommand):
-    def run(self, edit, **args):
-        return
-
-
-
-class CutEntryCommand(sublime_plugin.TextCommand):
     def run(self, edit, **args):
         return
 
@@ -731,7 +736,19 @@ class CodeSearchCommand(sublime_plugin.TextCommand):
 
 
 
-#class GotoDefinationCommand(sublime_plugin.TextCommand):
-#    def run(self, edit, **args):
-#        return
+class GotoDefinationCommand(sublime_plugin.TextCommand):
+    def run(self, edit, **args):
+        return
 
+
+class OpenIssueDefCommand(sublime_plugin.TextCommand):
+    def run(self, edit, **args):
+        settings = sublime.load_settings(BTLIME_SETTING_FILE)
+        issuedef = settings.get("issuedef", None)
+        if not issuedef:
+            return
+
+        for entry in issuedef:
+            idfile = os.path.join(current.pkgpath(), 'issuedef', 
+                entry['filename'])
+            self.view.window().open_file(idfile)
