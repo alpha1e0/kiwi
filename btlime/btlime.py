@@ -21,6 +21,7 @@ import sublime_plugin
 
 BTLIME_SETTING_FILE = 'btlime.sublime-settings'
 BTLIME_SYNTAX_FILE = "Packages/btlime/btlime.sublime-syntax"
+DEFAULT_ENCODING = "utf-8"
 
 
 class FileError(Exception):
@@ -147,6 +148,37 @@ class current(object):
         pass
 
 
+    @classmethod
+    def cache_dir(cls, view):
+        settings = sublime.load_settings(BTLIME_SETTING_FILE)
+        cachedir = settings.get("cache_directory_name", ".btlime-cache")
+        projdir = cls.projectdir(view)
+
+        return os.path.join(projdir, cachedir)
+
+
+    @classmethod
+    def review_file(cls, view):
+        cachedir = cls.cache_dir(view)
+        
+        return os.path.join(cachedir, "review")
+
+
+    @classmethod
+    def trace_file(cls, view):
+        cachedir = cls.cache_dir(view)
+        
+        return os.path.join(cachedir, "trace")
+
+
+    @classmethod
+    def trash_file(cls, view):
+        cachedir = cls.cache_dir(view)
+        
+        return os.path.join(cachedir, "trash")
+
+
+
 def error(msg):
     sublime.error_message(str(msg))
 
@@ -197,6 +229,8 @@ def get_file_location(view, point):
         will get the file location: /aaa/bbb/xxx.py:24
     '''
     line_content, _, line_point = get_line(view, point)
+    if not line_content:
+        return None
 
     file_name = _match_file_name(line_content)
     if file_name:
@@ -213,7 +247,6 @@ def get_file_location(view, point):
         file_name = _match_file_name(line_content)
         if not file_name:
             current_point = line_point-1
-            print(current_point, line_content)
             continue
         else:
             return "{0}:{1}".format(file_name, lineno)
@@ -229,40 +262,58 @@ def get_info_entry(view, point):
             23- for i in range(100)
             24:     i = i**2
             25-     print i
-        will get the file location: /aaa/bbb/xxx.py:24
     '''
     result = ""
     line_content, line_region, line_point = get_line(view, point)
+
+    if not line_content:
+        return line_content, line_region
 
     before = []
     current_point = line_point - 1
     while current_point >= 0:
         current_content, _, current_point = get_line(view, current_point)
         # if meet blank line break
-        if not current_point:
+        if not current_content:
             break
 
         before.insert(0, current_content)
+        current_point = current_point-1
 
-    before_point = current_point
+    before_point = current_point+1
 
     after = []
-    current_point = line_point + 1
+    current_point = line_region.b
     while current_point < view.size():
         current_content, current_region, current_point = \
             get_line(view, current_point)
         # if meet blank line break
-        if not current_point:
+        if not current_content:
             break
 
         after.append(current_content)
+        current_point = current_region.b
 
-    after_point = current_region.b + 1
+    after_point = current_region.b
 
-    result = "\n".join(before) + (line_content+"\n") + "\n".join(after)
+    result = "\n".join(before) + "\n" + (line_content+"\n") + "\n".join(after)
 
-    return result, Region(before_point, after_point)
+    return result, sublime.Region(before_point, after_point)
 
+
+def get_cachedir_from_entry(view, point):
+    file_loc = get_file_location(view, point)
+    if not file_loc:
+        return None
+
+    settings = sublime.load_settings(BTLIME_SETTING_FILE)
+    cachedir = settings.get("cache_directory_name", ".btlime-cache")
+
+    for folder in view.window().folders():
+        if file_loc.startswith(folder):
+            return os.path.join(folder, cachedir)
+
+    return None
 
 
 def get_code_context(view, point, ctxs=2):
@@ -433,6 +484,30 @@ def simple_search(patterns, directories, includes, exculdes):
 
 
 
+def _init_trace_file(filename):
+    header = "#!btlime\n\n"
+    if not os.path.exists(filename):
+        with open(filename, 'w') as _file:
+            _file.write(header + \
+                "# Record the trace information for code review.\n\n")
+
+
+def _init_review_file(filename):
+    header = "#!btlime\n\n"
+    if not os.path.exists(filename):
+        with open(filename, 'w') as _file:
+            _file.write(header + \
+                "# Record the review information.\n\n")
+
+
+def _init_trash_file(filename):
+    header = "#!btlime\n\n"
+    if not os.path.exists(filename):
+        with open(filename, 'w') as _file:
+            _file.write(header + \
+                "# Trash file\n\n")
+
+
 def analyze(view, btcmd, projdir, cachedir):
     if btcmd:
         bt_analyze(view, btcmd, projdir, cachedir)
@@ -443,22 +518,10 @@ def analyze(view, btcmd, projdir, cachedir):
     review_file = os.path.join(cachedir, "review")
     trash_file = os.path.join(cachedir, "trash")
 
+    _init_review_file(review_file)
+    _init_trace_file(trace_file)
+    _init_trash_file(trash_file)
 
-    header = "#!btlime\n\n"
-    if not os.path.exists(trace_file):
-        with open(trace_file, 'w') as _file:
-            _file.write(header + \
-                "# Record the trace information for code review.\n\n")
-
-    if not os.path.exists(review_file):
-        with open(review_file, 'w') as _file:
-            _file.write(header + \
-                "# Record the review information.\n\n")
-
-    if not os.path.exists(trash_file):
-        with open(trash_file, 'w') as _file:
-            _file.write(header + \
-                "# Trash file\n\n")
 
 
 @run_in_thread
@@ -562,13 +625,51 @@ class JumpLocationCommand(sublime_plugin.TextCommand):
 
 class SendtoTrashCommand(sublime_plugin.TextCommand):
     def run(self, edit, **args):
-        return
+        content, region = get_info_entry(self.view, current.point(self.view))
+        if not content:
+            return
+
+        try:
+            trash_file = current.trash_file(self.view)
+        except AttributeError:
+            cache_dir = get_cachedir_from_entry(self.view, 
+                current.point(self.view))
+            if not cache_dir:
+                return
+            trash_file = os.path.join(cache_dir, "trash")
+
+        if not os.path.exists(trash_file):
+            cache_dir = current.cache_dir(self.view)
+            _init_trash_file(trash_file)
+
+        with open(trash_file, 'a', encoding=DEFAULT_ENCODING) as _file:
+            _file.write("\n"+content+"\n")
+
+        self.view.erase(edit, region)
 
 
 
 class SendtoReviewCommand(sublime_plugin.TextCommand):
     def run(self, edit, **args):
-        return
+        content, region = get_info_entry(self.view, current.point(self.view))
+        if not content:
+            return
+
+        try:
+            review_file = current.review_file(self.view)
+        except AttributeError:
+            cache_dir = get_cachedir_from_entry(self.view, 
+                current.point(self.view))
+            if not cache_dir:
+                return
+            review_file = os.path.join(cache_dir, "review")
+
+        if not os.path.exists(review_file):
+            cache_dir = current.cache_dir(self.view)
+            _init_review_file(review_file)
+
+        with open(review_file, 'a', encoding=DEFAULT_ENCODING) as _file:
+            _file.write("\n"+content+"\n")
 
 
 #====
