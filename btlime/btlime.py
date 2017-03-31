@@ -89,6 +89,15 @@ class current(object):
 
 
     @classmethod
+    def wordregion(cls, view):
+        sel = view.sel()[0]
+        if sel.a == sel.b:
+            return view.word(sel)
+        else:
+            return sel
+
+
+    @classmethod
     def regions(cls, view):
         return [r for r in view.sel()]
 
@@ -100,7 +109,7 @@ class current(object):
 
     @classmethod
     def word(cls, view):
-        return view.substr(view.word(view.sel()[0]))
+        return view.substr(cls.wordregion(view))
 
 
     @classmethod
@@ -317,19 +326,21 @@ def get_cachedir_from_entry(view, point):
 
 
 def get_code_context(view, point, ctxs=2):
-    row = lambda p: view.rowcol(p)[0]
+    row = lambda p: view.rowcol(p)[0]+1
 
     line_content, line_region, line_point = get_line(view, point)
 
-    word = view.word(point)
+    word = current.word(view)
     rowno = row(line_point)
     context = [(rowno, line_content)]
 
+    current_point = line_point
     for i in range(ctxs):
-        current_point = line_point - 1
+        current_point = current_point - 1
         current_content, _, current_point = get_line(view, current_point)
         context.insert(0, (row(current_point), current_content))
 
+    current_region = line_region
     for i in range(ctxs):
         current_point = current_region.b + 1
         current_content, current_region, _ = get_line(view, current_point)
@@ -339,16 +350,17 @@ def get_code_context(view, point, ctxs=2):
 
 
 def get_formated_code_context(view, point, ctxs=2):
-    context = get_code_context(view, point, ctxs)
+    context, rowno, word = get_code_context(view, point, ctxs)
+    largest_lineno = context[-1][0]
 
-    result = "<Match:{0}>\n".format(context[2])
+    result = "<Match:{0}>\n@{1}\n".format(word, view.file_name())
 
     no_fmt = "{0:>" + str(len(str(largest_lineno))) + "}"
     fmt = "{lineno}{spliter} {content}\n"
 
-    for line in context[0]:
-        spliter = "-" if line[0]!=context[1] else ":"
-        result = result + fmt.format(lineno = no_fmt(line[0]),
+    for line in context:
+        spliter = "-" if line[0]!=rowno else ":"
+        result = result + fmt.format(lineno = no_fmt.format(line[0]),
             spliter = spliter,
             content = line[1])
 
@@ -557,6 +569,10 @@ def simple_analyze(view, projdir, cachedir):
 
 
 
+class StartReviewModeCommand(sublime_plugin.TextCommand):
+    def run(self, edit, **args):
+        print("review mode")
+
 
 class RunBugtrackCommand(sublime_plugin.TextCommand):
     def run(self, edit, **args):
@@ -639,7 +655,6 @@ class SendtoTrashCommand(sublime_plugin.TextCommand):
             trash_file = os.path.join(cache_dir, "trash")
 
         if not os.path.exists(trash_file):
-            cache_dir = current.cache_dir(self.view)
             _init_trash_file(trash_file)
 
         with open(trash_file, 'a', encoding=DEFAULT_ENCODING) as _file:
@@ -665,7 +680,6 @@ class SendtoReviewCommand(sublime_plugin.TextCommand):
             review_file = os.path.join(cache_dir, "review")
 
         if not os.path.exists(review_file):
-            cache_dir = current.cache_dir(self.view)
             _init_review_file(review_file)
 
         with open(review_file, 'a', encoding=DEFAULT_ENCODING) as _file:
@@ -714,14 +728,16 @@ class FindForwardCommand(sublime_plugin.TextCommand):
 
     def run(self, edit, **args):
         if not self._is_finding:
-            current_region = self.view.word(self.view.sel()[0])
+            current_region = current.wordregion(self.view)
             self._draw_regions([current_region])
             self.view.settings().set("is_finding", True)
 
-        all_match_regions = self.view.find_all(self._match_word)
+        all_match_regions = self.view.find_all(self._match_word, 
+            sublime.LITERAL)
 
         pre_regions = self._get_pre_regions(self._current_regions, 
             all_match_regions)
+
         self.view.show(pre_regions[0])
 
         self._draw_regions(pre_regions)
@@ -813,13 +829,43 @@ class FindFirstCommand(sublime_plugin.TextCommand):
 
 class RecordtoReviewCommand(sublime_plugin.TextCommand):
     def run(self, edit, **args):
-        return
+        settings = sublime.load_settings(BTLIME_SETTING_FILE)
+        ctxs = settings.get("result_context", 2)
+
+        context = get_formated_code_context(self.view, 
+            current.point(self.view),ctxs)
+        
+        review_file = current.review_file(self.view)
+
+        if not os.path.exists(review_file):
+            _init_review_file(review_file)
+
+        try:
+            with open(review_file, 'a', encoding=DEFAULT_ENCODING) as _file:
+                _file.write("\n"+context+"\n")
+        except FileNotFoundError as error:
+            error(str(error))
 
 
 
 class RecordtoTraceCommand(sublime_plugin.TextCommand):
     def run(self, edit, **args):
-        return
+        settings = sublime.load_settings(BTLIME_SETTING_FILE)
+        ctxs = settings.get("result_context", 2)
+
+        context = get_formated_code_context(self.view, 
+            current.point(self.view),ctxs)
+        
+        trace_file = current.trace_file(self.view)
+
+        if not os.path.exists(trace_file):
+            _init_trace_file(trace_file)
+
+        try:
+            with open(trace_file, 'a', encoding=DEFAULT_ENCODING) as _file:
+                _file.write("\n"+context+"\n")
+        except FileNotFoundError as error:
+            error(str(error))
 
 
 

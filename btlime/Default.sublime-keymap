@@ -1,5 +1,12 @@
 [
     {
+        "keys": ["ctrl+f"],
+        "command": "start_review_mode",
+        "context": [
+            { "key": "setting.bt_review_mode", "operator": "equal", "operand": true }
+        ]
+    },
+    {
         "keys": ["ctrl+1"],
         "command": "jump_location",
         "context": [
@@ -20,14 +27,31 @@
             { "key": "selector", "operator": "equal", "operand": "btlime.info" }
         ]
     },
-    {"keys": ["alt+a"], "command": "show_issue"},
-    {"keys": ["alt+s"], "command": "code_search"},
-    {"keys": ["alt+d"], "command": "find_forward"},
-    {"keys": ["alt+f"], "command": "find_first"},
-    {"keys": ["alt+c"], "command": "goto_defination"},
-    {"keys": ["alt+z"], "command": "recordto_review"},
-    {"keys": ["alt+x"], "command": "record to trace"},
-    { "keys": ["escape"], "command": "clean_findings", "context":
+    {
+        "keys": ["alt+a"],
+        "command": "show_issue"},
+    {
+        "keys": ["alt+s"],
+        "command": "code_search"},
+    {
+        "keys": ["alt+d"],
+        "command": "find_forward"},
+    {
+        "keys": ["alt+f"],
+        "command": "find_first"},
+    {
+        "keys": ["alt+c"],
+        "command": "goto_defination"},
+    {
+        "keys": ["alt+z"],
+        "command": "recordto_review"},
+    {
+        "keys": ["alt+x"],
+        "command": "recordto_trace"},
+    {
+        "keys": ["escape"], 
+        "command": "clean_findings", 
+        "context":
         [
             { "key": "setting.is_finding", "operator": "equal", "operand": true }
         ]
