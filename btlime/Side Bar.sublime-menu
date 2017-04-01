@@ -3,7 +3,7 @@
         "caption": "-"
     },
     {
-        "caption": "Code analyse",
+        "caption": "Code analyze",
         "command": "run_bugtrack",
         "args": {
             "dirs": [],

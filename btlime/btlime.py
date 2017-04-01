@@ -188,11 +188,11 @@ class current(object):
 
 
 
-def error(msg):
+def show_error(msg):
     sublime.error_message(str(msg))
 
 
-def status(msg):
+def show_status(msg):
     sublime.active_window().status_message(str(msg))
 
 
@@ -405,13 +405,12 @@ def load_patterns(scope):
 def run_cmd(cmd):
     if isinstance(cmd, list):
         cmd = [str(c) for c in cmd]
-        cmd = " ".join(cmd)
 
     output = ""
     try:
-        output = subprocess.check_output(cmd, shell=True)
+        output = subprocess.check_output(cmd)
     except Exception as error:
-        error(str(error))
+        show_error(str(error))
 
     return output
 
@@ -481,7 +480,6 @@ def pt_search(ptcmd, patterns, directories, includes, excludes):
     for pattern in patterns:
         for directory in directories:
             cmd = _build_pt_command(ptcmd, pattern, directory, ctxs)
-            #cmd = "pt eval /Users/apple/tmp/proja -C 2 | cat"
             pt_output = run_cmd(cmd)
             search_result = search_result + "\n" + _format_pt_result(pt_output,
                 pattern)
@@ -491,7 +489,7 @@ def pt_search(ptcmd, patterns, directories, includes, excludes):
 
 
 def simple_search(patterns, directories, includes, exculdes):
-    error("Can not find code search tool 'pt',"
+    show_error("Can not find code search tool 'pt',"
         " and simple mode is not support now")
 
 
@@ -549,22 +547,22 @@ def bt_analyze(view, btcmd, projdir, cachedir):
         "-o", result_file]
     cmd = " ".join(cmd)
 
-    status("Running bugtrack ...")
+    show_status("Running bugtrack ...")
 
     try:
         output = subprocess.check_output(cmd, shell=True)
     except Exception as error:
-        error(str(error))
+        show_error(str(error))
         return
 
-    status("Bugtrack scan finished.")
+    show_status("Bugtrack scan finished.")
 
     view.window().open_file(result_file)
 
 
 @run_in_thread
 def simple_analyze(view, projdir, cachedir):
-    error("Can not find code search tool 'bugtrack',"
+    show_error("Can not find code search tool 'bugtrack',"
         " and simple mode is not support now")
 
 
@@ -597,14 +595,14 @@ class RunBugtrackCommand(sublime_plugin.TextCommand):
 
         cmd = [btcmd, projdir, "--exclude", cachename,
             "-o", result_file]
-        cmd = " ".join(cmd)
+        #cmd = " ".join(cmd)
 
         self.show_message("Running bugtrack ...")
 
         try:
             output = subprocess.check_output(cmd, shell=True)
         except Exception as error:
-            error(str(error))
+            show_error(str(error))
             return
 
         self.show_message("Bugtrack scan finished.")
@@ -634,7 +632,7 @@ class JumpLocationCommand(sublime_plugin.TextCommand):
         if os.path.exists(file_name):
             self.view.window().open_file(file_loc, sublime.ENCODED_POSITION)
         else:
-            error("File '{0}'' doses not exists.".format(
+            show_error("File '{0}'' doses not exists.".format(
                 file_name))
 
 
@@ -726,33 +724,52 @@ class FindForwardCommand(sublime_plugin.TextCommand):
     FINDING_KEY = "finding"
     FINDING_SCOPE = "invalid.deprecated"
 
+    def __init__(self, *args, **kwargs):
+        self._current_region_index = 0
+        self._match_regions = []
+
+        super(FindForwardCommand, self).__init__(*args, **kwargs)
+
+
     def run(self, edit, **args):
         if not self._is_finding:
             current_region = current.wordregion(self.view)
-            self._draw_regions([current_region])
+            match_word = current.word(self.view)
+
+            self._match_regions = self._get_pre_matchs(current_region, 
+                match_word)
+            self._draw_regions(self._match_regions)
+
+            self._current_region_index = len(self._match_regions)-1
             self.view.settings().set("is_finding", True)
+        else:
+            region = self._get_pre_region()
 
-        all_match_regions = self.view.find_all(self._match_word, 
-            sublime.LITERAL)
-
-        pre_regions = self._get_pre_regions(self._current_regions, 
-            all_match_regions)
-
-        self.view.show(pre_regions[0])
-
-        self._draw_regions(pre_regions)
+            self.view.show(region)
 
 
-    def _get_pre_regions(self, cregions, aregions):
-        if len(cregions) == len(aregions):
-            return cregions
+    def _get_pre_matchs(self, current_region, match_word):
+        '''
+        获取当前位置之前的所有匹配位置
+        '''
+        pre_match_regions = []
+        all_match_regions = self.view.find_all(match_word, sublime.LITERAL)
 
-        pos = len(aregions)-1
-        for i in range(len(aregions)-1):
-            if aregions[i+1] == cregions[0]:
-                pos = i
+        for region in all_match_regions:
+            pre_match_regions.append(region)
+            if region == current_region:
+                break
 
-        return aregions[pos:]
+        return pre_match_regions
+
+
+    def _get_pre_region(self):
+        index = self._current_region_index - 1
+        if index == -1:
+            index = len(self._match_regions) - 1
+
+        self._current_region_index = index
+        return self._match_regions[index]
 
 
     def _draw_regions(self, regions):
@@ -760,19 +777,70 @@ class FindForwardCommand(sublime_plugin.TextCommand):
 
 
     @property
-    def _match_word(self):
+    def _is_finding(self):
+        return True if self.view.get_regions(self.FINDING_KEY) else False
+
+
+class FindBackwardCommand(sublime_plugin.TextCommand):
+    FINDING_KEY = "finding"
+    FINDING_SCOPE = "invalid.deprecated"
+
+    def __init__(self, *args, **kwargs):
+        self._current_region_index = 0
+        self._match_regions = []
+
+        super(FindBackwardCommand, self).__init__(*args, **kwargs)
+
+
+    def run(self, edit, **args):
         if not self._is_finding:
-            word = current.word(self.view)
+            current_region = current.wordregion(self.view)
+            match_word = current.word(self.view)
+
+            self._match_regions = self._get_post_regions(current_region, 
+                match_word)
+            self._draw_regions(self._match_regions)
+
+            self._current_region_index = len(self._match_regions)-1
+            self.view.settings().set("is_finding", True)
         else:
-            word_region = self._current_regions[0]
-            word = self.view.substr(word_region)
+            region = self._get_next_region()
 
-        return word
+            self.view.show(region)
 
 
-    @property
-    def _current_regions(self):
-        return self.view.get_regions(self.FINDING_KEY)
+    def _get_post_regions(self, current_region, match_word):
+        '''
+        获取当前位置之前的所有匹配位置
+        '''
+        post_match_regions = []
+        all_match_regions = self.view.find_all(match_word, sublime.LITERAL)
+
+        find = False
+        for region in all_match_regions:
+            if region == current_region:
+                find = True
+
+            if find == False:
+                continue
+
+            post_match_regions.append(region)
+            
+
+        return post_match_regions
+
+
+    def _get_next_region(self):
+        index = self._current_region_index + 1
+        if index == len(self._match_regions):
+            index = 0
+
+        self._current_region_index = index
+        return self._match_regions[index]
+
+
+    def _draw_regions(self, regions):
+        self.view.add_regions(self.FINDING_KEY, regions, self.FINDING_SCOPE)
 
 
     @property
@@ -794,7 +862,7 @@ class FindFirstCommand(sublime_plugin.TextCommand):
 
     def run(self, edit, **args):
         if not self._is_finding:
-            current_region = self.view.word(self.view.sel()[0])
+            current_region = self.wordregion(self.view)
             current_word = current.word(self.view)
             first_region = self.view.find(current_word, 0)
 
@@ -844,7 +912,7 @@ class RecordtoReviewCommand(sublime_plugin.TextCommand):
             with open(review_file, 'a', encoding=DEFAULT_ENCODING) as _file:
                 _file.write("\n"+context+"\n")
         except FileNotFoundError as error:
-            error(str(error))
+            show_error(str(error))
 
 
 
@@ -865,7 +933,7 @@ class RecordtoTraceCommand(sublime_plugin.TextCommand):
             with open(trace_file, 'a', encoding=DEFAULT_ENCODING) as _file:
                 _file.write("\n"+context+"\n")
         except FileNotFoundError as error:
-            error(str(error))
+            show_error(str(error))
 
 
 
