@@ -65,6 +65,12 @@
 
             },
             {
+                "caption": "Find Backward",
+                "id": "find-backward",
+                "command": "find_backward"
+
+            },
+            {
                 "caption": "Find First",
                 "id": "find-first",
                 "command": "find_first"

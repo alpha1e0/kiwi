@@ -35,6 +35,11 @@
 
             },
             {
+                "caption": "Find Backward",
+                "command": "find_backward"
+
+            },
+            {
                 "caption": "Find First",
                 "command": "find_first"
 
