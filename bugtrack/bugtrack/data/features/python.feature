@@ -96,10 +96,10 @@ features:
   confidence: Medium
   references: []
   patterns:
-    - eval
-    - eval_r
-    - exec
-    - execfile
+    - \beval\b
+    - \beval_r\b
+    - \bexec\b
+    - \bexecfile\b
 
 
 - ID: PY_RUNING_IMPORT_0001

@@ -34,10 +34,13 @@ class Analyzer(object):
     def analyze(self):
         for file in filemgr.walk(self.directory, self.exts, self.igexts, 
             self.excludes, self.gitignore):
-            for feature in featuremgr[file.scope]:
-                matchctxes = file.match(feature.patterns, self.ectx)
-                for matchctx in matchctxes:
-                    feature.evaluate(matchctx, self.sctx)
+            try:
+                for feature in featuremgr[file.scope]:
+                    matchctxes = file.match(feature.patterns, self.ectx)
+                    for matchctx in matchctxes:
+                        feature.evaluate(matchctx, self.sctx)
+            except KeyError:
+                continue
 
         reporter = TextReporter()
         reporter.report(issuemgr, sys.stdout, self.directory)
