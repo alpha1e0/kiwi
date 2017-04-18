@@ -731,8 +731,7 @@ class ShowIssueCommand(sublime_plugin.TextCommand):
         return True if self.view.get_regions(self.ISSUE_KEY) else False
 
 
-
-class FindForwardCommand(sublime_plugin.TextCommand):
+class FindAllCommand(sublime_plugin.TextCommand):
     FINDING_KEY = "finding"
     FINDING_SCOPE = "invalid.deprecated"
 
@@ -740,10 +739,12 @@ class FindForwardCommand(sublime_plugin.TextCommand):
         self._current_region_index = 0
         self._match_regions = []
 
-        super(FindForwardCommand, self).__init__(*args, **kwargs)
+        super(FindAllCommand, self).__init__(*args, **kwargs)
 
 
     def run(self, edit, **args):
+        forward = args.get('forward', False)
+
         if not self._is_current_finding:
             self.view.erase_regions(self.FINDING_KEY)
             self.view.settings().set("is_finding", False)
@@ -757,7 +758,10 @@ class FindForwardCommand(sublime_plugin.TextCommand):
 
             self.view.settings().set("is_finding", True)
         else:
-            region = self._get_pre_region()
+            if forward:
+                region = self._get_pre_region()
+            else:
+                region = self._get_next_region()
 
             self.view.show(region)
 
@@ -787,71 +791,6 @@ class FindForwardCommand(sublime_plugin.TextCommand):
 
         self._current_region_index = index
         return self._match_regions[index]
-
-
-    def _draw_regions(self, regions):
-        self.view.add_regions(self.FINDING_KEY, regions, self.FINDING_SCOPE)
-
-
-    @property
-    def _is_current_finding(self):
-        regions = self.view.get_regions(self.FINDING_KEY)
-        
-        if regions:
-            current_region = current.wordregion(self.view)
-            for region in regions:
-                if region == current_region:
-                    return True
-        
-        return False
-
-
-class FindBackwardCommand(sublime_plugin.TextCommand):
-    FINDING_KEY = "finding"
-    FINDING_SCOPE = "invalid.deprecated"
-
-    def __init__(self, *args, **kwargs):
-        self._current_region_index = 0
-        self._match_regions = []
-
-        super(FindBackwardCommand, self).__init__(*args, **kwargs)
-
-
-    def run(self, edit, **args):
-        if not self._is_current_finding:
-            self.view.erase_regions(self.FINDING_KEY)
-            self.view.settings().set("is_finding", False)
-
-            current_region = current.wordregion(self.view)
-            match_word = current.word(self.view)
-
-            self._match_regions, self._current_region_index = \
-                self._get_match_info(current_region, match_word)
-            self._draw_regions(self._match_regions)
-
-            self.view.settings().set("is_finding", True)
-        else:
-            region = self._get_next_region()
-
-            self.view.show(region)
-
-
-    def _get_match_info(self, current_region, match_word):
-        '''
-        获取当前位置之前的所有匹配位置
-        '''
-        index = 0
-        all_match_regions = self.view.find_all(match_word, sublime.LITERAL)
-
-        for region in all_match_regions:
-            if region == current_region:
-                break
-            index += 1
-
-        if index >= len(all_match_regions):
-            index = len(all_match_regions)
-
-        return all_match_regions, index
 
 
     def _get_next_region(self):

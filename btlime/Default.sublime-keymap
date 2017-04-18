@@ -30,11 +30,13 @@
     },
     {
         "keys": ["alt+q"],
-        "command": "find_forward"
+        "command": "find_all",
+        "args": {"forward": true}
     },
     {
         "keys": ["alt+w"],
-        "command": "find_backward"
+        "command": "find_all",
+        "args": {"forward": false}
     },
     {
         "keys": ["alt+f"],
