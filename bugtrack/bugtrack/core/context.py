@@ -9,17 +9,36 @@ Copyright (c) 2016 alpha1e0
 
 
 class MatchContext(object):
+    '''
+    漏洞匹配的上下文信息类
+        保存正则匹配上下文信息
+        提供漏洞评价相关函数方法
+    '''
     def __init__(self, filename, pattern, lineno, ctxlines):
-        self.filename = filename
-        self.lineno = lineno
-        self.pattern = pattern
-        self.ctxlines = ctxlines
+        '''
+        @params:
+            filename: 漏洞匹配的相关文件文件名
+            pattern:  哪个特征匹配的
+            lineno:   在哪一行匹配
+            ctxlines: 匹配的上下文行 [[lineno, line], ... ]
+        '''
+        self._filename = filename
+        self._lineno = lineno
+        self._pattern = pattern
+        self._ctxlines = ctxlines
+
+        for line in self._ctxlines:
+            if line[0] == self._lineno:
+                self._match_line = line[1]
+
+        lines = [x[1] for x in self._ctxlines]
+        self._str_ctx = "\n".join(lines)
 
 
     def get_ctx_lines(self, ctxrange):
         idx = 0
-        for i in range(len(self.ctxlines)):
-            if self.ctxlines[i][0] == self.lineno:
+        for i in range(len(self._ctxlines)):
+            if self._ctxlines[i][0] == self._lineno:
                 idx = i
                 break
 
@@ -27,16 +46,35 @@ class MatchContext(object):
         e = idx + ctxrange + 1
 
         s = s if s>=0 else 0
-        e = e if e<len(self.ctxlines) else len(self.ctxlines)
+        e = e if e<len(self._ctxlines) else len(self._ctxlines)
 
-        return self.ctxlines[s:e]
+        return self._ctxlines[s:e]
 
 
     @property
-    def matchline(self):
-        for line in self.ctxlines:
-            if line[0] == self.lineno:
-                return line[1]
+    def match_line(self):
+        return self._match_line
 
-        return ""
+
+    @property
+    def str_ctx(self):
+        return self._str_ctx
+
+
+    def contains(self, keyword):
+        '''
+        判断漏洞特征匹配行是否包含关键字keyword
+        '''
+        return keyword in self._match_line
+
+
+    def ctx_contains(self, keyword):
+        '''
+        判断漏洞特征匹配上下文是否包含关键字keyword
+        '''
+        return keyword in self._str_ctx
+
+
+
+
         

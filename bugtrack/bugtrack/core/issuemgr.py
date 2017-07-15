@@ -16,62 +16,18 @@ class Issue(dict):
     def __init__(self, **kwargs):
         '''
         @params:
-            ID
-            name:
-            scope:
-            severity:
-            confidence:
-            references:
-            pattern:
-            filename:
-            lineno:
-            context:
+            ID:         检测漏洞使用的规则ID
+            name:       检测漏洞使用的规则名称
+            scope:      scope信息
+            severity:   ['High'|'Medium'|'Low'|'Info']
+            confidence: ['High'|'Medium'|'Low'|'Info']
+            references: 漏洞相关介绍信息链接地址
+            pattern:    漏洞匹配的pattern
+            filename:   漏洞涉及的文件的位置
+            lineno:     漏洞所在的行号
+            context:    漏洞上下文信息
         '''
         super(Issue, self).__init__(kwargs)
-
-
-
-    def _format_context(self):
-        result = ""
-
-        largest_lineno = self['context'][-1][0]
-        no_fmt = "{0:>" + str(len(str(largest_lineno))) + "}"
-
-        for line in self['context']:
-            if line[0] == self['lineno']:
-                result = result + no_fmt.format(str(line[0])) + ": " +\
-                    line[1].rstrip() + "\n"
-            else:
-                result = result + no_fmt.format(str(line[0])) + "- " +\
-                    line[1].rstrip() + "\n"
-
-        return result
-
-
-    def totext(self):
-        template = (
-            "[{id}:{name}]\n"
-            "<Match:{pattern}> <Severity:{severity}> "
-            "<Confidence:{confidence}>\n"
-            "@{filename}\n"
-            "{context}\n")
-
-        return template.format(
-            id = self['ID'],
-            name = self['name'],
-            pattern = self['pattern'],
-            severity = self['severity'],
-            confidence = self['confidence'],
-            filename = self['filename'],
-            context = self._format_context())
-
-
-    def to_console_text(self):
-        return self.totext()
-
-
-    def tohtml(self):
-        return ""
 
 
 
@@ -81,16 +37,10 @@ class IssueManager(object):
     '''
     def __init__(self):
         self._issues = []
-        self._senfiles = []
 
 
     def __iter__(self):
         return iter(self._issues)
-
-
-    @property
-    def senfiles(self):
-        return self._senfiles
 
 
     def add(self, **kwargs):
@@ -99,8 +49,18 @@ class IssueManager(object):
         self._issues.append(issue)
 
 
-    def add_senfile(self, filename):
-        self._senfiles.append(filename)
+    def add_senfile(self, filename, scope, pattern):
+        issuemgr.add(
+            ID = "SENTIVE FILE",
+            name = "Sensitive file",
+            scope = scope,
+            severity = "Low",
+            confidence = "Low",
+            pattern = pattern,
+            filename = matchctx.filename,
+            lineno = "0",
+            context = []
+            )
 
 
     def statistics(self):

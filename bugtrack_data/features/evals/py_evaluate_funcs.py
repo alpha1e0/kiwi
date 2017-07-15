@@ -14,7 +14,7 @@ from bugtrack.core.featuremgr import evaluate
 
 @evaluate
 def py_cmd_inject_0002(feature, matchctx):
-    if "shell=True" in matchctx.matchline:
-        return feature.level
+    if matchctx.contains("shell=True"):
+        return (feature['severity'], feature['confidencd'])
     else:
-        return False
+        return None

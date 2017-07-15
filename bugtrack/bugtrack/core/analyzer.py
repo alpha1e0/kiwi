@@ -10,44 +10,35 @@ Copyright (c) 2016 alpha1e0
 
 import sys
 
+from commons import conf
 from filemgr import filemgr
 from featuremgr import featuremgr
 from issuemgr import issuemgr
-from reporter import TextReporter
+from reporter import get_reporter
+from reporter import ConsoleReporter
 
 
 
 class Analyzer(object):
-    def __init__(self, directory="", exts=[], igexts=[], 
-        excludes=[], gitignore=True, sctx=2, ectx=10,
-        output=""):
-        self.directory = directory
-        self.exts = exts
-        self.igexts = igexts
-        self.excludes = excludes
-        self.gitignore = gitignore
-        self.sctx = sctx
-        self.ectx = ectx
-        self.output = output
-
-
+    '''
+    代码审计的入口
+    '''
     def analyze(self):
-        for file in filemgr.walk(self.directory, self.exts, self.igexts, 
-            self.excludes, self.gitignore):
+        featuremgr.init()
+
+        for file in filemgr.walk():
             try:
                 for feature in featuremgr[file.scope]:
-                    matchctxes = file.match(feature.patterns, self.ectx)
+                    matchctxes = file.match(feature.patterns, conf.ectx)
                     for matchctx in matchctxes:
-                        feature.evaluate(matchctx, self.sctx)
+                        feature.evaluate(matchctx, conf.sctx)
             except KeyError:
                 continue
 
-        reporter = TextReporter()
-        reporter.report(issuemgr, sys.stdout, self.directory)
+        for report_name in conf.outputs:
+            reporter = get_reporter(report_name)
+            reporter.report(issuemgr, report_name)
 
-        if self.output:
-            with open(self.output, "w") as _file:
-                reporter.report(issuemgr, _file, self.directory)
-
-
+        reporter = ConsoleReporter()
+        reporter.report(sys.stdout)
 

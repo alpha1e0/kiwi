@@ -14,6 +14,7 @@ import threading
 import platform
 import shutil
 import ConfigParser
+import argparse
 
 import yaml
 from appdirs import AppDirs
@@ -195,33 +196,58 @@ class Out(object):
 
 
 class Config(Dict):
-    def __init__(self):
-        self['pkgpath'] = os.path.dirname(os.path.dirname(
-            os.path.realpath(__file__)))
+    def init(self, args):
+        for key in dir(args):
+            if not key.startswith("_"):
+                self[key] = getattr(args, key)
 
-        self['featurepath'] = os.path.join(self['pkgpath'], "data", "features")
+        data_path = self['feature_dir']
+        data_path = data_path or data_path = os.getenv("BUGTRACK_DATA_PATH")
+
+        if not data_path:
+            Out.error(u"未找到漏洞特征目录，工具将使用默认的漏洞特征，"
+                u"请通过 BUGTRACK_DATA_PATH 环境变量指定漏洞特征目录")
+            exit(1)
+
+        self['datapath'] = data_path
+
+        self['featurepath'] = os.path.join(self['datapath'], "features")
         self['evalpath'] = os.path.join(self['featurepath'], "evals")
         self['mapfile'] = os.path.join(self['pkgpath'], "data", "filemap")
         self['senfiles'] = os.path.join(self['pkgpath'], "data", "senfiles")
 
 
 
+class IDParamParser(argparse.Action):
+    '''
+    fileop模块file类型参数处理器
+    @remarks:
+        filePath@fileType参数 处理为 (filePath, fileType)
+        filePath 处理为 (filePath, None)
+    '''
+    def __call__(self, parser, namespace, values, option_string=None):
+        new_values = []
 
-class Dirs(Dict):
-    def __init__(self):
-        dirs = AppDirs("bugtrack","alpha1e0")
+        for value in values:
+            if value.startswith("@"):
+                file_name = value[1:]
+                try:
+                    with open(file_name) as _file:
+                        for line in _file:
+                            line = line.strip()
 
-        pkgpath = os.path.dirname(os.path.dirname(__file__))
+                            if line.startswith("#"):
+                                continue
+                            if not line:
+                                continue
 
-        userpath = dirs.user_data_dir
-        datapath = os.path.join(userpath, "data")
+                            new_values.append(line)
+                except IOError:
+                    Out.error("can not open file {0}".format(file_name))
+            else:
+                new_values.append(line)
 
-        for path in [userpath, datapath]:
-            os.mkdir(path)
-
-        self['pkgpath'] = pkgpath
-        self['userpath'] = userpath
-        self['datapath'] = datapath
+        setattr(namespace, self.dest, new_values)
 
 
 

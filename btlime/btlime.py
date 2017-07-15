@@ -50,20 +50,6 @@ class YamlConf(object):
         return result
 
 
-class Dict(dict):
-    def __init__(self, *args, **kwargs):
-        super(Dict, self).__init__(*args, **kwargs)
-
-    def __getattr__(self, key):
-        try:
-            return self[key]
-        except KeyError:
-            return None
-
-    def __setattr__(self, key, value):
-        self[key] = value
-
-
 
 def run_in_thread(func):
     def thread_func(*args, **kwargs):

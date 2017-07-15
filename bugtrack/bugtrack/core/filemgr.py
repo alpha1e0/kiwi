@@ -20,6 +20,9 @@ from issuemgr import issuemgr
 
 
 class File(object):
+    '''
+    文件类，用于正则匹配
+    '''
     def __init__(self, filename, scope, maxlen=0):
         self._filename = filename
         self._scope = scope
@@ -75,6 +78,9 @@ class File(object):
 
 
     def get_context_lines(self, lineno, ctxrange):
+        '''
+        获取匹配上下文信息
+        '''
         result = []
 
         data_lines_len = len(self._formated_lines)
@@ -96,11 +102,10 @@ class File(object):
     def match(self, patterns, ctxrange):
         '''
         @params:
-            patterns: 记录待匹配的正则表达式的列表
+            patterns: 待匹配的正则表达式的列表
             ctxrange: 记录多少行上下文信息
         @return:
-            [filename, pattern, lineno, context]
-                context [[lineno, line],...]
+            [MatchContext, ...]
         '''
         result = []
         for pattern in patterns:
@@ -119,10 +124,22 @@ class File(object):
 
 
 class FileManager(object):
+    '''
+    文件管理类
+    '''
     _METAINFOLEN = 50
 
     def __init__(self):
+        # 文件类型映射信息，结构:
+        #     {'extensions': 
+        #         [{'pattern':xx, 'scope':xx}, ...]
+        #      'metainfos':
+        #         [{'pattern':xx, 'scope':xx}, ...]
+        #     }
+        #
         self._mapconf = {}
+        # 敏感文件定义信息，结构：
+        #     {'patterns':[pattern, ...]}
         self._senfileconf = {}
 
         self._load_map_conf()
@@ -132,6 +149,9 @@ class FileManager(object):
 
 
     def _load_map_conf(self):
+        '''
+        加载文件类型映射信息
+        '''
         config = YamlConf(conf.mapfile)
 
         self._mapconf['extensions'] = []
@@ -152,7 +172,7 @@ class FileManager(object):
 
     def _load_senfiles_conf(self):
         '''
-        load the configure of sensitive files
+        加载敏感可以文件配置
         '''
         config = YamlConf(conf.senfiles)
 
@@ -161,52 +181,39 @@ class FileManager(object):
             self._senfileconf['patterns'].append(re.compile(pattern))
 
 
-    def _is_sensitive_file(self, filename):
+    def _add_sensitive_file(self, filename):
+        '''
+        通过文件名判断是否是可疑敏感文件
+        '''
         for pattern in self._senfileconf['patterns']:
             if pattern.search(filename):
+                issuemgr.add_senfile(filename, scope, pattern)
+                return
+
+
+
+    def isskip(self, filename):
+        '''
+        通过参数配置根据文件名过滤文件
+        '''
+        filename_sp = os.path.split(filename)
+        for vs in ['.git', 'CVS', '.svn']:
+            if vs in filename_sp:
                 return True
 
-        return False
-
-
-    def _gitignore(self, filename, directory):
-        if ".git" in filename:
-            return True
-
-        if self._gitignores:
-            for i in self._gitignores:
-                if i in filename:
-                    return True
-
-        if os.path.exists(os.path.join(directory, ".gitignore")):
-            with open(os.path.join(directory, ".gitignore")) as _file:
-                self._gitignores = _file.read().splitlines()
-
-                for i in self._gitignores:
-                    if i in filename:
-                        return True
-        else:
-            return False
-
-
-    def isskip(self, filename, directory, exts, igexts, excludes, gitignore):
-        if gitignore:
-            if self._gitignore(filename, directory):
-                return True
-
-        if excludes:
-            for kw in excludes:
+        if conf.excludes:
+            for kw in conf.excludes:
                 if kw in filename:
                     return True
 
-        if igexts:
-            for ext in igexts:
+        if conf.igexts:
+            for ext in conf.igexts:
                 if filename.endswith(ext):
                     return True
 
-        if exts:
+        if conf.extensions:
             is_ext_match = False
-            for ext in exts:
+            for ext in conf.extensions:
                 if filename.endswith(ext):
                     is_ext_match = True
                     break
@@ -215,24 +222,22 @@ class FileManager(object):
                 return True
 
 
-    def walk(self, directory, exts, igexts, excludes, gitignore):
-        self._directory = os.path.realpath(directory)
-        if not os.path.exists(self._directory):
-            raise FileError("cannot find directory {}".format(self._directory))
+    def walk(self):
+        target_dir = os.path.realpath(conf.target)
+        if not os.path.exists(target_dir):
+            raise FileError("cannot find directory {}".format(target_dir))
 
-        for path, dirs, files in os.walk(self._directory):
+        for path, dirs, files in os.walk(target_dir):
             for f in files:
                 filename = os.path.join(path, f)
-                if self.isskip(filename, directory, exts, igexts, excludes, 
-                    gitignore):
+                if self.isskip(filename):
                     continue
-
-                if self._is_sensitive_file(filename):
-                    issuemgr.add_senfile(filename)
 
                 scope = self._classify(filename)
                 if not scope:
                     continue
+
+                self._add_sensitive_file(filename):
 
                 yield File(filename, scope)
 

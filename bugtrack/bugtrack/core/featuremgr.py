@@ -24,13 +24,19 @@ from issuemgr import Issue
 
 class Feature(dict):
     '''
-    匹配特征类
+    漏洞特征类，管理正则特征、调用漏洞评价函数进行漏洞确认
     '''
     def __init__(self, featureobj, scopes, efmgr):
         self.scopes = scopes
         self._efmgr = efmgr
 
         super(Feature, self).__init__(**featureobj)
+
+        if 'severity' not in self:
+            self.['severity'] = "unknow"
+
+        if 'confidence' not in self:
+            self.['confidence'] = "unknow"
 
         self._init_patterns()
 
@@ -57,14 +63,14 @@ class Feature(dict):
             'confidence': self.get('confidence',"unknown")}
 
 
-    def _evaluate(self, *args, **kwargs):
+    def _evaluate(self, matchctx):
         '''
         使用评估函数评估漏洞等级
         @returns
             字典类型，{'severity':xx, 'confidence':xx}，为空则表示不认为构成漏洞
         '''
         if 'evaluate' in self:
-            return self._efmgr.run(self['evaluate'], *args, **kwargs)
+            return self._efmgr.run(self['evaluate'], self, matchctx)
         else:
             return {'severity': self.get('severity',"unknown"),
                 'confidence': self.get('confidence',"unknown")}
@@ -74,15 +80,19 @@ class Feature(dict):
         '''
         评估匹配结果
             对源码文件的正则匹配结果进行评估，判断是否是漏洞，如果是则评估漏洞等级
+        @params:
+            matchctx: 特征匹配的上下文信息
+            ctxrange: 漏洞中保存的上下文信息行数
         '''
-        eresult = self._evaluate(self, matchctx)
-        if eresult:
+        evaluate_result = self._evaluate(matchctx)
+
+        if evaluate_result:
             issuemgr.add(
                 ID = self['ID'],
                 name = self['name'],
                 scope = self.scopes,
-                severity = eresult['severity'],
-                confidence = eresult['confidence'],
+                severity = evaluate_result[0],
+                confidence = evaluate_result[1],
                 pattern = matchctx.pattern,
                 filename = matchctx.filename,
                 lineno = matchctx.lineno,
@@ -93,17 +103,23 @@ class Feature(dict):
 
 
 class FeatureManager(object):
+    '''
+    漏洞特征管理器
+    '''
     def __init__(self):
-        self._features = {}
+        # _scopes 列表，记录特征库中支持的所有 sope
         self._scopes = []
 
+        # _features 字典，{scope, featues}，记录所有scope和其相关的features
+        self._features = {}
+
+        # _dfmgr，漏洞评价函数管理器，用于加载、调用评价函数
         self._efmgr = EvalfuncsManager()
-        self._load_features()
 
 
-    def _load_features(self):
+    def init(self):
         '''
-        加载所有特征定义
+        初始化 漏洞特征管理器，加载所有指定的漏洞特征
         '''
         files = [os.path.join(conf.featurepath,f) \
             for f in os.listdir(conf.featurepath) \
@@ -116,6 +132,9 @@ class FeatureManager(object):
             features = []
 
             for feature in feature_def['features']:
+                if conf.feature_ids:
+                    if feature.ID not in conf.feature_ids:
+                        continue
                 features.append(Feature(feature, scopes, self._efmgr))
 
             for scope in scopes:
@@ -147,13 +166,20 @@ class FeatureManager(object):
 
 
 class EvalfuncsManager(object):
+    '''
+    漏洞评价函数管理器
+    '''
     def __init__(self):
+        # _evalfuncs 存储所有漏洞评价函数
         self._evalfuncs = {}
 
         self._load_evalfuncs()
 
 
     def _load_evalfuncs(self):
+        '''
+        加载漏洞评价函数
+        '''
         files = [f[:-3] for f in os.listdir(conf.evalpath) if f.endswith(".py")]
 
         if conf.evalpath not in sys.path:
@@ -184,10 +210,16 @@ class EvalfuncsManager(object):
 
 
 def evaluate(func):
+    '''
+    漏洞评估函数修饰器
+        使用方法示例：
+        @evaluate
+        def py_cmd_inject_eval(feature, matchctx):
+            return (severity, confidence)
+    '''
     func._evaluate = True
 
     return func
 
 
 featuremgr = FeatureManager()
-efmgr = EvalfuncsManager()

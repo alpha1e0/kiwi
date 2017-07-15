@@ -12,6 +12,23 @@ import sys
 import time
 import abc
 
+from commons import conf
+from issuemgr import issuemgr
+
+
+
+def get_reporter(filename):
+    if filename.endswith(".txt"):
+        return TextReporter()
+
+    if filename.endswith(".html"):
+        return HtmlReporter()
+
+    if filename.endswith(".idb"):
+        return DatabaseReporter()
+
+    return TextReporter()
+
 
 
 class Reporter(object):
@@ -32,28 +49,72 @@ class Reporter(object):
         banner = banner + fmt.format(
             "BugTrack. Security tool for auditing source code.") + "\n"
         banner = banner + \
-            fmt.format("https://github.com/alpha1e0/pentestdb") + "\n"
+            fmt.format("https://github.com/alpha1e0/bugtrack") + "\n"
         banner = banner + "+" + "-" * (self._WIDTH-2) + "+\n"
 
         return banner
 
 
-    def report(self, issuemgr, fobj, directory):
+    def report(self, target):
         '''
         输出问题
         '''
-        return
+        if isinstance(target, basestring):
+            with open(target, 'w') as _file:
+                self._report(_file)
+        else:
+            self._report(target)
+
+
+    def _report(self, fobj):
+        pass
+        
 
 
 class TextReporter(Reporter):
     scope = "text"
+
+    def _format_issue_context(self, context):
+        result = ""
+
+        largest_lineno = context[-1][0]
+        no_fmt = "{0:>" + str(len(str(largest_lineno))) + "}"
+
+        for line in context:
+            if line[0] == self['lineno']:
+                result = result + no_fmt.format(str(line[0])) + ": " +\
+                    line[1].rstrip() + "\n"
+            else:
+                result = result + no_fmt.format(str(line[0])) + "- " +\
+                    line[1].rstrip() + "\n"
+
+        return result
+
+
+    def _format_issue(self, issue):
+        template = (
+            "[{id}:{name}]\n"
+            "<Match:{pattern}> <Severity:{severity}> "
+            "<Confidence:{confidence}>\n"
+            "@{filename}\n"
+            "{context}\n")
+
+        return template.format(
+            id = issue['ID'],
+            name = issue['name'],
+            pattern = issue['pattern'],
+            severity = issue['severity'],
+            confidence = issue['confidence'],
+            filename = issue['filename'],
+            context = self._format_issue_context(issue['context']))
     
-    def report(self, issuemgr, fobj, directory):
+
+    def _report(self, fobj):
         template = "{title}\n\n{senfiles}\n\n{issues}\n\n{statistics}"
 
         title = "{banner}\nScaning <{directory}> at {time}".format(
                 banner = self.banner,
-                directory = directory,
+                directory = conf.target,
                 time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
 
         senfiles = "-"*80 + "\nFound sensitive files as follows:\n\n"
@@ -80,3 +141,13 @@ class TextReporter(Reporter):
         fobj.flush()
 
 
+class ConsoleReporter(TextReporter):
+    scope = "console"
+
+
+class HtmlReporter(Reporter):
+    pass
+
+
+class DatabaseReporter(Reporter):
+    pass
