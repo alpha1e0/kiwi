@@ -14,7 +14,6 @@ import threading
 import platform
 import shutil
 import ConfigParser
-import argparse
 
 import yaml
 from appdirs import AppDirs
@@ -110,7 +109,7 @@ class Out(object):
 
         if color.lower() in ['red','yellow','blue','green']:
             cstr = getattr(Fore, color.upper())
-            return cstr + msg + Style.REST_ALL
+            return cstr + msg + Style.RESET_ALL
         else:
             return msg
 
@@ -202,52 +201,21 @@ class Config(Dict):
                 self[key] = getattr(args, key)
 
         data_path = self['feature_dir']
-        data_path = data_path or data_path = os.getenv("BUGTRACK_DATA_PATH")
+        data_path = data_path or os.getenv("BUGTRACK_DATA_PATH")
 
         if not data_path:
-            Out.error(u"未找到漏洞特征目录，工具将使用默认的漏洞特征，"
-                u"请通过 BUGTRACK_DATA_PATH 环境变量指定漏洞特征目录")
+            Out.error(u"未找到漏洞特征目录，请使用参数-f/--feature_dir，"
+                u"或环境变量 BUGTRACK_DATA_PATH 指定漏洞特征目录")
             exit(1)
 
         self['datapath'] = data_path
 
         self['featurepath'] = os.path.join(self['datapath'], "features")
         self['evalpath'] = os.path.join(self['featurepath'], "evals")
-        self['mapfile'] = os.path.join(self['pkgpath'], "data", "filemap")
-        self['senfiles'] = os.path.join(self['pkgpath'], "data", "senfiles")
+        self['mapfile'] = os.path.join(self['datapath'], "filemap")
+        self['senfiles'] = os.path.join(self['datapath'], "senfiles")
 
-
-
-class IDParamParser(argparse.Action):
-    '''
-    fileop模块file类型参数处理器
-    @remarks:
-        filePath@fileType参数 处理为 (filePath, fileType)
-        filePath 处理为 (filePath, None)
-    '''
-    def __call__(self, parser, namespace, values, option_string=None):
-        new_values = []
-
-        for value in values:
-            if value.startswith("@"):
-                file_name = value[1:]
-                try:
-                    with open(file_name) as _file:
-                        for line in _file:
-                            line = line.strip()
-
-                            if line.startswith("#"):
-                                continue
-                            if not line:
-                                continue
-
-                            new_values.append(line)
-                except IOError:
-                    Out.error("can not open file {0}".format(file_name))
-            else:
-                new_values.append(line)
-
-        setattr(namespace, self.dest, new_values)
+        self['opengrok_base'] = os.getenv("BUGTRACK_OPENGROK_BASE") or None
 
 
 

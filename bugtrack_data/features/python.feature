@@ -16,7 +16,7 @@ scopes:
 
 features:
 - ID: PY_CMD_INJ_001
-  name: "Use 'os/commands' module for execute command in shells"
+  name: "Use 'os/commands' module to execute command in shells"
   references: []
   severity: High
   confidence: High
@@ -36,7 +36,7 @@ features:
 
 
 - ID: PY_CMD_INJ_002
-  name: "Use 'subprocess' module with shell=True for execute command in shells"
+  name: "Use 'subprocess' module with shell=True to execute command in shells"
   severity: High
   confidence: Medium
   references: []

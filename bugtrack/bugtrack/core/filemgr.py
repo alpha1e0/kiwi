@@ -46,6 +46,10 @@ class File(object):
         self._formated_lines = self._get_formated_lines()
 
 
+    @property
+    def length(self):
+        return len(self._formated_lines)
+
 
     @property
     def filename(self):
@@ -137,15 +141,25 @@ class FileManager(object):
         #         [{'pattern':xx, 'scope':xx}, ...]
         #     }
         #
-        self._mapconf = {}
+        self._map_conf = {}
         # 敏感文件定义信息，结构：
         #     {'patterns':[pattern, ...]}
-        self._senfileconf = {}
+        self._senfile_conf = {}
 
+        # 保存文件统计信息
+        self._scope_statistics = {}
+
+        self._gitignores = []
+
+
+    def init(self):
         self._load_map_conf()
         self._load_senfiles_conf()
 
-        self._gitignores = []
+
+    @property
+    def scope_statistics(self):
+        return self._scope_statistics
 
 
     def _load_map_conf(self):
@@ -154,17 +168,17 @@ class FileManager(object):
         '''
         config = YamlConf(conf.mapfile)
 
-        self._mapconf['extensions'] = []
-        self._mapconf['metainfos'] = []
+        self._map_conf['extensions'] = []
+        self._map_conf['metainfos'] = []
 
         for ext in config['extensions']:
-            self._mapconf['extensions'].append({
+            self._map_conf['extensions'].append({
                 'pattern': re.compile(ext['pattern']),
                 'scope': ext['scope']
                 })
 
         for meta in config['metainfos']:
-            self._mapconf['metainfos'].append({
+            self._map_conf['metainfos'].append({
                 'pattern': re.compile(meta['pattern']),
                 'scope': meta['scope']
                 })
@@ -176,23 +190,23 @@ class FileManager(object):
         '''
         config = YamlConf(conf.senfiles)
 
-        self._senfileconf['patterns'] = []
+        self._senfile_conf['patterns'] = []
         for pattern in config['patterns']:
-            self._senfileconf['patterns'].append(re.compile(pattern))
+            self._senfile_conf['patterns'].append(re.compile(pattern))
 
 
-    def _add_sensitive_file(self, filename):
+    def _add_sensitive_file(self, filename, scope):
         '''
         通过文件名判断是否是可疑敏感文件
         '''
-        for pattern in self._senfileconf['patterns']:
+        for pattern in self._senfile_conf['patterns']:
             if pattern.search(filename):
                 issuemgr.add_senfile(filename, scope, pattern)
                 return
 
 
 
-    def isskip(self, filename):
+    def is_file_skip(self, filename):
         '''
         通过参数配置根据文件名过滤文件
         '''
@@ -230,28 +244,34 @@ class FileManager(object):
         for path, dirs, files in os.walk(target_dir):
             for f in files:
                 filename = os.path.join(path, f)
-                if self.isskip(filename):
+                if self.is_file_skip(filename):
                     continue
 
                 scope = self._classify(filename)
                 if not scope:
                     continue
 
-                self._add_sensitive_file(filename):
+                self._add_sensitive_file(filename, scope)
 
-                yield File(filename, scope)
+                file = File(filename, scope)
+                if scope in self._scope_statistics:
+                    self._scope_statistics[scope] += file.length
+                else:
+                    self._scope_statistics[scope] = file.length
+
+                yield file
 
 
     def _classify(self, filename):
         '''
         判断文件类型，将文件类型映射到相应的scope
         '''
-        for ext in self._mapconf['extensions']:
+        for ext in self._map_conf['extensions']:
             m = ext['pattern'].search(filename)
             if m:
                 return ext['scope']
 
-        for meta in self._mapconf['metainfos']:
+        for meta in self._map_conf['metainfos']:
             with open(filename) as _file:
                 content = _file.read(self._METAINFOLEN)
                 m = meta['pattern'].search(content)

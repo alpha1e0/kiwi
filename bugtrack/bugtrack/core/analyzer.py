@@ -24,6 +24,7 @@ class Analyzer(object):
     代码审计的入口
     '''
     def analyze(self):
+        filemgr.init()
         featuremgr.init()
 
         for file in filemgr.walk():
@@ -35,9 +36,10 @@ class Analyzer(object):
             except KeyError:
                 continue
 
-        for report_name in conf.outputs:
-            reporter = get_reporter(report_name)
-            reporter.report(issuemgr, report_name)
+        if conf.outputs:
+            for report_name in conf.outputs:
+                reporter = get_reporter(report_name)
+                reporter.report(report_name)
 
         reporter = ConsoleReporter()
         reporter.report(sys.stdout)

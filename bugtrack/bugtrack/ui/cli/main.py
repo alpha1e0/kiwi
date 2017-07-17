@@ -14,7 +14,44 @@ import argparse
 
 from bugtrack.core.analyzer import Analyzer
 from bugtrack.core.commons import conf
-from bugtrack.core.commons import IDParamParser
+
+
+
+class TargetParamParser(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        setattr(namespace, self.dest, os.path.abspath(values))
+
+
+class IDParamParser(argparse.Action):
+    '''
+    fileop模块file类型参数处理器
+    @remarks:
+        filePath@fileType参数 处理为 (filePath, fileType)
+        filePath 处理为 (filePath, None)
+    '''
+    def __call__(self, parser, namespace, values, option_string=None):
+        new_values = []
+
+        for value in values:
+            if value.startswith("@"):
+                file_name = value[1:]
+                try:
+                    with open(file_name) as _file:
+                        for line in _file:
+                            line = line.strip()
+
+                            if line.startswith("#"):
+                                continue
+                            if not line:
+                                continue
+
+                            new_values.append(line)
+                except IOError:
+                    Out.error("can not open file {0}".format(file_name))
+            else:
+                new_values.append(line)
+
+        setattr(namespace, self.dest, new_values)
 
 
 
@@ -22,8 +59,8 @@ def main():
     parser = argparse.ArgumentParser(description="Bugtrack. Audit source code"
         " for security issuses")
 
-    parser.add_argument("-t", "--target", required=True,
-        help=u"指定待扫描的目录")
+    parser.add_argument("-t", "--target", required=True, 
+        action=TargetParamParser, help=u"指定待扫描的目录")
     parser.add_argument("-f", "--feature_dir", help=u"指定漏洞特征定义目录")
     parser.add_argument("-i", "--feature_ids", nargs="+", action=IDParamParser,
         help=u"指定加载哪些漏洞特征")

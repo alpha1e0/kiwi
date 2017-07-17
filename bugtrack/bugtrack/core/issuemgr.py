@@ -56,8 +56,8 @@ class IssueManager(object):
             scope = scope,
             severity = "Low",
             confidence = "Low",
-            pattern = pattern,
-            filename = matchctx.filename,
+            pattern = pattern.pattern,
+            filename = filename,
             lineno = "0",
             context = []
             )

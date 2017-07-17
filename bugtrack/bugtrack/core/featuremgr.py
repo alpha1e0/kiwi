@@ -33,10 +33,10 @@ class Feature(dict):
         super(Feature, self).__init__(**featureobj)
 
         if 'severity' not in self:
-            self.['severity'] = "unknow"
+            self['severity'] = "unknow"
 
         if 'confidence' not in self:
-            self.['confidence'] = "unknow"
+            self['confidence'] = "unknow"
 
         self._init_patterns()
 
@@ -67,13 +67,13 @@ class Feature(dict):
         '''
         使用评估函数评估漏洞等级
         @returns
-            字典类型，{'severity':xx, 'confidence':xx}，为空则表示不认为构成漏洞
+            字典类型，('severity', 'confidence')，为空则表示不认为构成漏洞
         '''
         if 'evaluate' in self:
             return self._efmgr.run(self['evaluate'], self, matchctx)
         else:
-            return {'severity': self.get('severity',"unknown"),
-                'confidence': self.get('confidence',"unknown")}
+            return (self.get('severity',"unknown"),
+                self.get('confidence',"unknown"))
 
 
     def evaluate(self, matchctx, ctxrange):
@@ -113,14 +113,14 @@ class FeatureManager(object):
         # _features 字典，{scope, featues}，记录所有scope和其相关的features
         self._features = {}
 
-        # _dfmgr，漏洞评价函数管理器，用于加载、调用评价函数
-        self._efmgr = EvalfuncsManager()
-
 
     def init(self):
         '''
         初始化 漏洞特征管理器，加载所有指定的漏洞特征
         '''
+        # _dfmgr，漏洞评价函数管理器，用于加载、调用评价函数
+        self._efmgr = EvalfuncsManager()
+
         files = [os.path.join(conf.featurepath,f) \
             for f in os.listdir(conf.featurepath) \
             if f.endswith(".feature")]

@@ -14,6 +14,8 @@ import abc
 
 from commons import conf
 from issuemgr import issuemgr
+from filemgr import filemgr
+from html_template import render_html
 
 
 
@@ -21,7 +23,7 @@ def get_reporter(filename):
     if filename.endswith(".txt"):
         return TextReporter()
 
-    if filename.endswith(".html"):
+    if filename.endswith(".html") or filename.endswith("htm"):
         return HtmlReporter()
 
     if filename.endswith(".idb"):
@@ -74,14 +76,16 @@ class Reporter(object):
 class TextReporter(Reporter):
     scope = "text"
 
-    def _format_issue_context(self, context):
+    def _format_issue_context(self, issue):
         result = ""
+        if not issue['context']:
+            return result
 
-        largest_lineno = context[-1][0]
+        largest_lineno = issue['context'][-1][0]
         no_fmt = "{0:>" + str(len(str(largest_lineno))) + "}"
 
-        for line in context:
-            if line[0] == self['lineno']:
+        for line in issue['context']:
+            if line[0] == issue['lineno']:
                 result = result + no_fmt.format(str(line[0])) + ": " +\
                     line[1].rstrip() + "\n"
             else:
@@ -106,24 +110,20 @@ class TextReporter(Reporter):
             severity = issue['severity'],
             confidence = issue['confidence'],
             filename = issue['filename'],
-            context = self._format_issue_context(issue['context']))
+            context = self._format_issue_context(issue))
     
 
     def _report(self, fobj):
-        template = "{title}\n\n{senfiles}\n\n{issues}\n\n{statistics}"
+        template = "{title}\n\n\n{issues}\n\n{statistics}"
 
         title = "{banner}\nScaning <{directory}> at {time}".format(
                 banner = self.banner,
                 directory = conf.target,
                 time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
 
-        senfiles = "-"*80 + "\nFound sensitive files as follows:\n\n"
-        for filename in issuemgr.senfiles:
-            senfiles = senfiles + "@" + filename + "\n"
-
-        issues = "-"*80 + "\nFound security issues as follows:\n\n"
+        issues_content = "-"*80 + "\nFound security issues as follows:\n\n"
         for issue in issuemgr:
-            issues = issues + issue.totext()
+            issues_content = issues_content + self._format_issue(issue)
 
         statistics = "-"*80 + "\nStatistics information:\n"
         sinfo = issuemgr.statistics()
@@ -133,20 +133,79 @@ class TextReporter(Reporter):
 
         content = template.format(
             title=title,
-            senfiles = senfiles,
-            issues = issues,
+            issues = issues_content,
             statistics = statistics)
 
         fobj.write(content)
         fobj.flush()
 
 
+
 class ConsoleReporter(TextReporter):
     scope = "console"
 
 
+
 class HtmlReporter(Reporter):
-    pass
+    def _format_issue_context(self, issue):
+        result = ""
+        if not issue['context']:
+            return result
+
+        largest_lineno = issue['context'][-1][0]
+        no_fmt = "{0:>" + str(len(str(largest_lineno))) + "}"
+
+        for line in issue['context']:
+            if line[0] == issue['lineno']:
+                result = result + no_fmt.format(str(line[0])) + ": " +\
+                    line[1].rstrip() + "\n"
+            else:
+                result = result + no_fmt.format(str(line[0])) + "- " +\
+                    line[1].rstrip() + "\n"
+
+        return result
+
+
+    def _get_file_link(self, filename):
+        if not conf.opengrok_base:
+            return filename
+
+        filename_sp = os.path.split(filename)
+        directory_sp = os.path.split(conf.target)
+
+        filename_suffix_list = filename_sp[len(directory_sp)-1:]
+
+        return conf.opengrok_base.rstrip("/") + "/" + \
+            "/".join(filename_suffix_list)
+
+
+    def _report(self, fobj):
+        #import pdb;pdb.set_trace()
+        directory = conf.target
+        scan_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+
+        statistics = [v for k,v in issuemgr.statistics().iteritems()]
+
+        scope_titles = []
+        scope_contents = []
+        for scope,linenum in filemgr.scope_statistics.iteritems():
+            scope_titles.append(scope)
+            scope_contents.append(linenum)
+
+        issues = []
+        for issue in issuemgr:
+            new_issue = dict(**issue)
+            new_issue['file_link'] = self._get_file_link(issue['filename'])
+            new_issue['context'] = self._format_issue_context(issue)
+
+            issues.append(new_issue)
+
+        html = render_html(fobj.name, directory, scan_time, statistics, 
+            scope_titles, scope_contents, issues)
+
+        fobj.write(html)
+        fobj.flush()
+
 
 
 class DatabaseReporter(Reporter):

@@ -22,23 +22,23 @@ class MatchContext(object):
             lineno:   在哪一行匹配
             ctxlines: 匹配的上下文行 [[lineno, line], ... ]
         '''
-        self._filename = filename
-        self._lineno = lineno
-        self._pattern = pattern
-        self._ctxlines = ctxlines
+        self.filename = filename
+        self.lineno = lineno
+        self.pattern = pattern
+        self.ctxlines = ctxlines
 
-        for line in self._ctxlines:
-            if line[0] == self._lineno:
+        for line in self.ctxlines:
+            if line[0] == self.lineno:
                 self._match_line = line[1]
 
-        lines = [x[1] for x in self._ctxlines]
+        lines = [x[1] for x in self.ctxlines]
         self._str_ctx = "\n".join(lines)
 
 
     def get_ctx_lines(self, ctxrange):
         idx = 0
-        for i in range(len(self._ctxlines)):
-            if self._ctxlines[i][0] == self._lineno:
+        for i in range(len(self.ctxlines)):
+            if self.ctxlines[i][0] == self.lineno:
                 idx = i
                 break
 
@@ -46,9 +46,9 @@ class MatchContext(object):
         e = idx + ctxrange + 1
 
         s = s if s>=0 else 0
-        e = e if e<len(self._ctxlines) else len(self._ctxlines)
+        e = e if e<len(self.ctxlines) else len(self.ctxlines)
 
-        return self._ctxlines[s:e]
+        return self.ctxlines[s:e]
 
 
     @property
