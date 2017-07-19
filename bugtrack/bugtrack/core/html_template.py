@@ -23,94 +23,142 @@ html = '''
 html * {{
     font-family: "Arial", sans-serif;
 }}
-pre {{
-    font-family: "Monaco", monospace;
+body {{
+    background-color: #DCDCDC;
 }}
-.bordered-box {{
-    border: 1px solid black;
-    padding-top:.5em;
-    padding-bottom:.5em;
-    padding-left:1em;
+hr.strong {{
+    border-top: 3px solid #000000;
 }}
-.metrics-box {{
-    font-size: 1.1em;
-    line-height: 130%;
-}}
-.metrics-title {{
-    font-size: 1.5em;
-    font-weight: 500;
-    margin-bottom: .25em;
-}}
-.issue-description {{
-    font-size: 1.3em;
-    font-weight: 500;
-}}
-.candidate-issues {{
-    margin-left: 2em;
-    border-left: solid 1px; LightGray;
-    padding-left: 5%;
-    margin-top: .2em;
-    margin-bottom: .2em;
-}}
-.issue-block {{
-    border: 1px solid LightGray;
-    padding-left: .5em;
-    padding-top: .5em;
-    padding-bottom: .5em;
-    margin-bottom: .5em;
-}}
-.issue-sev-high {{
-    background-color: Pink;
-}}
-.issue-sev-medium {{
-    background-color: NavajoWhite;
-}}
-.issue-sev-low {{
-    background-color: LightCyan;
-}}
-#footer {{
+.footer {{
     font-size: 75%;
     padding: 9px 0;
     text-align: center;
     width: 100%;
 }}
+.content {{
+    margin-left: auto;
+    margin-right: auto;
+    width: 80%;
+    background-color: #FFFFFF;
+    border-radius: 5px;
+    box-shadow: 5px 5px 2px #888888;
+}}
+.summary {{
+    padding: 15px 20px 15px 20px;
+}}
+
+.title {{
+    font-size: 1.5em;
+    padding-top: 5px;
+    padding-bottom: 10px;
+}}
+
+.directory {{
+    color: #4169E1;
+}}
+
+.time {{
+    color: #4169E1;
+}}
+
+.summary-table {{
+    border-collapse: collapse;
+}}
+
+.summary-table td, .summary-table th 
+{{
+    font-size: 1em;
+    text-align: center;
+    border: 2px solid #191970;
+    padding: 3px 7px 2px 7px;
+}}
+.summary-table th {{
+    font-size: 1.1em;
+    padding-top: 5px;
+    padding-bottom: 4px;
+    background-color: #ADD8E6;
+}}
+.issue-block {{
+    margin: 10px 10px 10px 10px;
+    padding: 10px 10px 10px 10px;
+    color: #696969;
+    border-top: solid;
+    border-top-width: 2px
+}}
+.issue-block b {{
+    color: #000000;
+}}
+.issue-title {{
+    font-size: 1.2em;
+}}
+.issue-pattern {{
+
+}}
+.issue-level-high {{
+    color: #FF0000
+}}
+.issue-level-medium {{
+    color: #F4A460
+}}
+.issue-level-low {{
+    color: #4169E1
+}}
+.issue-level-info {{
+    color: #66CDAA
+}}
+.context {{
+    margin: 10px 0px 5px 0px;
+    border-top: 1px solid;
+    border-bottom: 1px solid;
+    background-color: #F0FFFF;
+}}
+.context pre {{
+    font-family: sans-serif;
+    color: #2030a2;
+    padding: 0px 5px 0px 5px
+}}
 </style>
 </head>
 
 <body>
-<div id='summary'>
-    <div class='metrics-box bordered-box'>
-        <div class='metrics-title'>
-            Scaning {directory} at {scan_time} <br>
-        </div>
-        <table id='summary-table' border="1">
-            <tr>
-            <th>严重程度</th>
-            <th>High</th>
-            <th>Medium</th>
-            <th>Low</th>
-            <th>Info</th>
-            <th>编程语言</th>
-            {scope_titles}
-            </tr>
-            <tr>
-            <th>漏洞个数</th>
-            <td>{high_num}</td>
-            <td>{medium_num}</td>
-            <td>{low_num}</td>
-            <td>{info_num}</td>
-            <th>代码行数</th>
-            {scope_contents}
-            </tr>
-        </table>
+<div class='content'>
+<div class='summary'>
+    <div class='title'>
+        BugTrack. Scaning <span class='directory'>{directory}</span> at <span class='time'>{scan_time}</span> <br>
     </div>
+    <hr />
+    <table class='summary-table'>
+        <thead>
+            <tr>
+                <th>严重程度</th>
+                <th>High</th>
+                <th>Medium</th>
+                <th>Low</th>
+                <th>Info</th>
+                <th>编程语言</th>
+                {scope_titles}
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>漏洞个数</td>
+                <td>{high_num}</td>
+                <td>{medium_num}</td>
+                <td>{low_num}</td>
+                <td>{info_num}</td>
+                <td>代码行数</td>
+                {scope_contents}
+            </tr>
+        </tbody>
+    </table>
 </div>
 
-<hr />
+<hr class='strong' />
 <div id='results'>
 {issues}
 </div>
-<div id='footer'>
+</div>
+<div class='footer'>
     Copyright (c) 2016 alpha1e0, See <a href='https://github.com/alpha1e0/bugtrack'>bugtrack</a>
 </div>
 </body>
@@ -118,15 +166,15 @@ pre {{
 '''
 
 html_issue = '''
-<div id='{issue_id}'>
-    <div class='issue-block issue-sev-{severity_class}'>
-        <b>{issue_id}: </b> {issue_name}<br>
-        <b>Match: </b>{pattern}&nbsp&nbsp
-        <b>Severity: </b>{severity}&nbsp&nbsp
-        <b>Confidence: </b>{confidence}</br />
+<div class='issue'>
+    <div class='issue-block'>
+        <div class='issue-title'><b>{issue_id}: </b> {issue_name}<br></div>
+        <b>Match: </b><strong class='issue-pattern'>{pattern}</strong>&nbsp&nbsp
+        <b>Severity: </b><i class='issue-level-{severity_class}'>{severity}</i>&nbsp&nbsp
+        <b>Confidence: </b><i class='issue-level-{confidence_class}'>{confidence}</i></br />
         <b>File: </b><a href='{file_link}' target='_blank'>{file}</a><br />
         {reference}
-        <div id='code'>
+        <div class='context'>
             <pre>
 {code_context}
             </pre>
@@ -136,7 +184,7 @@ html_issue = '''
 '''
 
 html_scope_title = '''
-<td>{scope}</td>
+<th>{scope}</th>
 '''
 
 html_scope_content = '''
@@ -171,13 +219,14 @@ def render_html(report_name, directory, scan_time, statistics, scope_titles,
         issue_content = html_issue.format(
             issue_id=issue['ID'],
             severity_class=issue['severity'].lower(),
+            confidence_class=issue['confidence'].lower(),
             issue_name=issue['name'],
             pattern=issue['pattern'],
             severity=issue['severity'],
             confidence=issue['confidence'],
             file_link=issue['file_link'],
             file=issue['filename'],
-            code_context=issue['context'],
+            code_context=issue['context'].rstrip(),
             reference=reference
             )
 
