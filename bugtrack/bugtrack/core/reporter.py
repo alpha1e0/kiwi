@@ -148,7 +148,7 @@ class ConsoleReporter(TextReporter):
 
 class HtmlReporter(Reporter):
     def _format_issue_context(self, issue):
-        result = ""
+        result = []
         if not issue['context']:
             return result
 
@@ -157,11 +157,9 @@ class HtmlReporter(Reporter):
 
         for line in issue['context']:
             if line[0] == issue['lineno']:
-                result = result + no_fmt.format(str(line[0])) + ": " +\
-                    line[1].rstrip() + "\n"
+                result.append((no_fmt.format(str(line[0])), line[1], True))
             else:
-                result = result + no_fmt.format(str(line[0])) + "- " +\
-                    line[1].rstrip() + "\n"
+                result.append((no_fmt.format(str(line[0])), line[1], False))
 
         return result
 

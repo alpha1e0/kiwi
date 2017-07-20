@@ -117,6 +117,12 @@ hr.strong {{
     color: #2030a2;
     padding: 0px 5px 0px 5px
 }}
+.lineno {{
+    color: #FF7F50;
+}}
+.lineno-strong {{
+    color: #FF0000;
+}}
 </style>
 </head>
 
@@ -169,31 +175,30 @@ html_issue = '''
 <div class='issue'>
     <div class='issue-block'>
         <div class='issue-title'><b>{issue_id}: </b> {issue_name}<br></div>
-        <b>Match: </b><strong class='issue-pattern'>{pattern}</strong>&nbsp&nbsp
+        <b>Match: </b><ins class='issue-pattern'>{pattern}</ins>&nbsp&nbsp
         <b>Severity: </b><i class='issue-level-{severity_class}'>{severity}</i>&nbsp&nbsp
         <b>Confidence: </b><i class='issue-level-{confidence_class}'>{confidence}</i></br />
         <b>File: </b><a href='{file_link}' target='_blank'>{file}</a><br />
         {reference}
-        <div class='context'>
-            <pre>
-{code_context}
-            </pre>
-        </div>
+        {code_context}
     </div>
 </div>
 '''
 
-html_scope_title = '''
-<th>{scope}</th>
+html_scope_title = '''<th>{scope}</th>'''
+
+html_scope_content = '''<td>{codelines}</td>'''
+
+html_reference = ("<b>References: </b><a href='{reference}'"
+    " target='_blank'>{reference}</a><br />")
+
+html_code_context='''
+        <div class='context'>
+            <pre>{context}</pre>
+        </div>
 '''
 
-html_scope_content = '''
-<td>{codelines}</td>
-'''
-
-html_reference = '''
-<b>References: </b><a href='{reference}' target='_blank'>{reference}</a><br />
-'''
+html_code_context_line = "<i class='{style}'>{lineno}: </i>{line}"
 
 
 def render_html(report_name, directory, scan_time, statistics, scope_titles, 
@@ -205,6 +210,27 @@ def render_html(report_name, directory, scan_time, statistics, scope_titles,
         scope_titles: 列表，列表的每项用来填充html_scope_title
         scope_contents: 列表，列表的每项用来填充html_scope_content
     '''
+    def _render_code_context(context):
+        if not context:
+            return ""
+            
+        result = []
+
+        for lineno,line,is_match in context:
+            if is_match:
+                result.append(html_code_context_line.format(
+                    style='lineno-strong',
+                    lineno=lineno,
+                    line=line.strip("\r\n")))
+            else:
+                result.append(html_code_context_line.format(
+                    style='lineno',
+                    lineno=lineno,
+                    line=line.strip("\r\n")))
+
+        return html_code_context.format(context="\n".join(result)).strip()
+
+
     scope_titles_content = "\n".join(
         [html_scope_title.format(scope=st) for st in scope_titles])
 
@@ -226,9 +252,9 @@ def render_html(report_name, directory, scan_time, statistics, scope_titles,
             confidence=issue['confidence'],
             file_link=issue['file_link'],
             file=issue['filename'],
-            code_context=issue['context'].rstrip(),
+            code_context=_render_code_context(issue['context']),
             reference=reference
-            )
+            ).strip()
 
         issues_list.append(issue_content)
 
