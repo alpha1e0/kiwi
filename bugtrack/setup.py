@@ -14,7 +14,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="bugtrack",
-    version="1.0",
+    version="1.1",
     packages=find_packages()+['bugtrack.data.features.evals'],
 
     include_package_data = True,
@@ -34,6 +34,7 @@ setup(
     entry_points = {
         'console_scripts': [
             'bugtrack = bugtrack.ui.cli.main:main',
+            'bt-report-console = bugtrack.ui.webui.report_console:main'
         ],
     }
 )

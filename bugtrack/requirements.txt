@@ -1,6 +1,6 @@
 appdirs>=1.4.0
 pyyaml>=3.11
 colorama>=0.3.7
-flask
-eventlet
-jinja2
+flask>=0.12.2
+eventlet>=0.21.0
+jinja2>=2.7.3
