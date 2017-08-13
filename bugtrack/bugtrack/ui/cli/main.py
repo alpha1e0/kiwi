@@ -12,8 +12,8 @@ import os
 import sys
 import argparse
 
+from bugtrack.core.common import conf
 from bugtrack.core.analyzer import Analyzer
-from bugtrack.core.commons import conf
 
 
 
@@ -75,10 +75,10 @@ def main():
     parser.add_argument("--ectx", type=int, default=10,
         help=u"指定用于评估漏洞所需的上下文信息的文件行数")
     parser.add_argument("-o", "--outputs", nargs="+",
-        help=u"指定输出报告文件")
+        help=u"指定输出报告文件，支持.txt/.html/.json/.db")
     
     args = parser.parse_args()
 
-    conf.init(args)
+    conf.init_args(args)
 
     Analyzer().analyze()

@@ -15,6 +15,6 @@ from bugtrack.core.featuremgr import evaluate
 @evaluate
 def py_cmd_inject_0002(feature, matchctx):
     if matchctx.contains("shell=True"):
-        return (feature['severity'], feature['confidencd'])
+        return (feature['severity'], feature['confidence'])
     else:
         return None

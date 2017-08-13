@@ -61,13 +61,15 @@
             {
                 "caption": "Find Forward",
                 "id": "find-forward",
-                "command": "find_forward"
+                "command": "find_all",
+                "args": {"forward": true}
 
             },
             {
                 "caption": "Find Backward",
                 "id": "find-backward",
-                "command": "find_backward"
+                "command": "find_all",
+                "args": {"forward": false}
 
             },
             {

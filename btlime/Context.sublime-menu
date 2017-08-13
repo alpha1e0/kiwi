@@ -31,12 +31,14 @@
             },
             {
                 "caption": "Find Forward",
-                "command": "find_forward"
+                "command": "find_all",
+                "args": {"forward": true}
 
             },
             {
                 "caption": "Find Backward",
-                "command": "find_backward"
+                "command": "find_all",
+                "args": {"forward": false}
 
             },
             {

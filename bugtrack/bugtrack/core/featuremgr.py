@@ -14,11 +14,12 @@ import re
 import importlib
 import inspect
 
-from exceptions import FeatureError
-from commons import YamlConf
-from commons import conf
+from exception import FeatureError
+from common import YamlConf
+from common import conf
 from issuemgr import issuemgr
 from issuemgr import Issue
+from constant import High, Medium, Low, Info
 
 
 
@@ -26,6 +27,12 @@ class Feature(dict):
     '''
     漏洞特征类，管理正则特征、调用漏洞评价函数进行漏洞确认
     '''
+
+    High = High
+    Medium = Medium
+    Low = Low
+    Info = Info
+
     def __init__(self, featureobj, scopes, efmgr):
         self.scopes = scopes
         self._efmgr = efmgr
@@ -33,10 +40,20 @@ class Feature(dict):
         super(Feature, self).__init__(**featureobj)
 
         if 'severity' not in self:
-            self['severity'] = "unknow"
+            self['severity'] = Info
+        else:
+            try:
+                self['severity'] = getattr(self, self['severity'])
+            except KeyError:
+                self['severity'] = Info
 
         if 'confidence' not in self:
-            self['confidence'] = "unknow"
+            self['confidence'] = Low
+        else:
+            try:
+                self['confidence'] = getattr(self, self['confidence'])
+            except KeyError:
+                self['confidence'] = Low
 
         self._init_patterns()
 
@@ -72,8 +89,8 @@ class Feature(dict):
         if 'evaluate' in self:
             return self._efmgr.run(self['evaluate'], self, matchctx)
         else:
-            return (self.get('severity',"unknown"),
-                self.get('confidence',"unknown"))
+            return (self.get('severity', Low),
+                self.get('confidence', Low))
 
 
     def evaluate(self, matchctx, ctxrange):
@@ -96,7 +113,7 @@ class Feature(dict):
                 pattern = matchctx.pattern,
                 filename = matchctx.filename,
                 lineno = matchctx.lineno,
-                context = matchctx.get_ctx_lines(ctxrange)
+                context = matchctx.get_decoded_ctx_lines(ctxrange)
                 )
 
 

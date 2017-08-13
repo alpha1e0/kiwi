@@ -32,4 +32,11 @@ class FileError(BugtrackError):
 
 class FeatureError(BugtrackError):
     pass
-        
+
+
+class IssueFormatError(BugtrackError):
+    pass
+
+
+class DatabaseError(BugtrackError):
+    pass

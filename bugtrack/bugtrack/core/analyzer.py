@@ -10,10 +10,9 @@ Copyright (c) 2016 alpha1e0
 
 import sys
 
-from commons import conf
+from common import conf
 from filemgr import filemgr
 from featuremgr import featuremgr
-from issuemgr import issuemgr
 from reporter import get_reporter
 from reporter import ConsoleReporter
 
@@ -39,8 +38,8 @@ class Analyzer(object):
         if conf.outputs:
             for report_name in conf.outputs:
                 reporter = get_reporter(report_name)
-                reporter.report(report_name)
+                reporter.report()
 
-        reporter = ConsoleReporter()
-        reporter.report(sys.stdout)
+        reporter = ConsoleReporter(None)
+        reporter.report()
 

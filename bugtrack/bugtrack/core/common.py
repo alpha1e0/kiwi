@@ -19,7 +19,7 @@ import yaml
 from appdirs import AppDirs
 from colorama import init, Fore, Style
 
-from exceptions import FileError
+from exception import FileError
 
 
 
@@ -195,7 +195,8 @@ class Out(object):
 
 
 class Config(Dict):
-    def init(self, args):
+    def init_args(self, args):
+        #import pdb;pdb.set_trace()
         for key in dir(args):
             if not key.startswith("_"):
                 self[key] = getattr(args, key)
@@ -216,6 +217,12 @@ class Config(Dict):
         self['senfiles'] = os.path.join(self['datapath'], "senfiles")
 
         self['opengrok_base'] = os.getenv("BUGTRACK_OPENGROK_BASE") or None
+
+        self['pkgpath'] = os.path.dirname(os.path.dirname(
+            os.path.realpath(__file__)))
+
+    def aaaa(self):
+        pass
 
 
 

@@ -8,28 +8,37 @@ Copyright (c) 2016 alpha1e0
 '''
 
 
+import os
 import sys
 import time
 import abc
+import json
 
-from commons import conf
+from jinja2 import Template
+
+from common import conf
 from issuemgr import issuemgr
+from issuemgr import IssueDatabase
 from filemgr import filemgr
-from html_template import render_html
+from constant import severity_map, confidence_map, status_map
+from constant import High, Medium, Low, Info
 
 
 
 def get_reporter(filename):
     if filename.endswith(".txt"):
-        return TextReporter()
+        return TextReporter(filename)
 
     if filename.endswith(".html") or filename.endswith("htm"):
-        return HtmlReporter()
+        return HtmlReporter(filename)
 
-    if filename.endswith(".idb"):
-        return DatabaseReporter()
+    if filename.endswith(".db"):
+        return DatabaseReporter(filename)
 
-    return TextReporter()
+    if filename.endswith(".json"):
+        return JsonReporter(filename)
+
+    return TextReporter(filename)
 
 
 
@@ -37,8 +46,9 @@ class Reporter(object):
     scope = 'default'
     _WIDTH = 80
 
-    def __init__(self):
+    def __init__(self, filename):
         self.banner = self._banner()
+        self._filename = filename
 
 
     def _banner(self):
@@ -57,24 +67,30 @@ class Reporter(object):
         return banner
 
 
-    def report(self, target):
+    def report(self):
         '''
         输出问题
         '''
-        if isinstance(target, basestring):
-            with open(target, 'w') as _file:
-                self._report(_file)
-        else:
-            self._report(target)
+        content = self._report()
+
+        if content is not None:
+            if not self._filename:
+                print content
+            else:
+                with open(self._filename, 'wb') as _file:
+                    if isinstance(content, unicode):
+                        content = content.encode("utf-8")
+
+                    _file.write(content)
 
 
-    def _report(self, fobj):
+    def _report(self):
         pass
         
 
 
 class TextReporter(Reporter):
-    scope = "text"
+    scope = "txt"
 
     def _format_issue_context(self, issue):
         result = ""
@@ -97,26 +113,26 @@ class TextReporter(Reporter):
 
     def _format_issue(self, issue):
         template = (
-            "[{id}:{name}]\n"
-            "<Match:{pattern}> <Severity:{severity}> "
-            "<Confidence:{confidence}>\n"
-            "@{filename}\n"
-            "{context}\n")
+            u"[{id}:{name}]\n"
+            u"<Match:{pattern}> <{severity}> "
+            u"<{confidence}>\n"
+            u"@{filename}\n"
+            u"{context}\n")
 
         return template.format(
             id = issue['ID'],
             name = issue['name'],
             pattern = issue['pattern'],
-            severity = issue['severity'],
-            confidence = issue['confidence'],
+            severity = severity_map[issue['severity']][1],
+            confidence = confidence_map[issue['confidence']][1],
             filename = issue['filename'],
             context = self._format_issue_context(issue))
     
 
-    def _report(self, fobj):
-        template = "{title}\n\n\n{issues}\n\n{statistics}"
+    def _report(self):
+        template = u"{title}\n\n\n{issues}\n\n{statistics}"
 
-        title = "{banner}\nScaning <{directory}> at {time}".format(
+        title = u"{banner}\nScaning <{directory}> at {time}".format(
                 banner = self.banner,
                 directory = conf.target,
                 time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
@@ -129,15 +145,15 @@ class TextReporter(Reporter):
         sinfo = issuemgr.statistics()
         for s in sinfo:
             statistics = statistics + \
-                "{key}: {value}".format(key=s, value=sinfo[s]) + "\n"
+                "{key}: {value}".format(key=severity_map[s][0], 
+                    value=sinfo[s]) + "\n"
 
         content = template.format(
-            title=title,
+            title = title,
             issues = issues_content,
             statistics = statistics)
 
-        fobj.write(content)
-        fobj.flush()
+        return content
 
 
 
@@ -147,42 +163,86 @@ class ConsoleReporter(TextReporter):
 
 
 class HtmlReporter(Reporter):
-    def _format_issue_context(self, issue):
-        result = []
-        if not issue['context']:
-            return result
+    def _get_formated_issues(self):
+        def _get_filelink(filename, scandir):
+            opengrok_base = os.getenv("BUGTRACK_OPENGROK_BASE")
+            if not opengrok_base:
+                return filename
 
-        largest_lineno = issue['context'][-1][0]
-        no_fmt = "{0:>" + str(len(str(largest_lineno))) + "}"
-
-        for line in issue['context']:
-            if line[0] == issue['lineno']:
-                result.append((no_fmt.format(str(line[0])), line[1], True))
+            scandir_sp = os.path.split(scandir)
+            filename_sp = os.path.split(filename)
+            
+            if len(filename_sp) <= len(scandir_sp):
+                return filename
             else:
-                result.append((no_fmt.format(str(line[0])), line[1], False))
-
-        return result
-
-
-    def _get_file_link(self, filename):
-        if not conf.opengrok_base:
-            return filename
-
-        filename_sp = os.path.split(filename)
-        directory_sp = os.path.split(conf.target)
-
-        filename_suffix_list = filename_sp[len(directory_sp)-1:]
-
-        return conf.opengrok_base.rstrip("/") + "/" + \
-            "/".join(filename_suffix_list)
+                rest_filename_sp = filename_sp[len(scandir_sp):]
+                return os.path.join(opengrok_base, rest_filename_sp)
 
 
-    def _report(self, fobj):
-        #import pdb;pdb.set_trace()
-        directory = conf.target
-        scan_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        issues = []
+        for issue in issuemgr:
+            new_issue = dict(issue)
+            new_issue['issueid'] = issue['ID']
+            new_issue['filelink'] = _get_filelink(issue['filename'],
+                conf.target)
 
-        statistics = [v for k,v in issuemgr.statistics().iteritems()]
+            new_issue['status_class'] = status_map[issue['status']][0]
+            new_issue['status_prompt'] = status_map[issue['status']][1] 
+
+            new_issue['severity_class'] = severity_map[issue['severity']][0]
+            new_issue['severity_prompt'] = severity_map[issue['severity']][1]
+
+            new_issue['confidence_class'] = confidence_map[issue['confidence']][0]
+            new_issue['confidence_prompt'] = confidence_map[issue['confidence']][1]
+
+            issues.append(new_issue)
+
+        return issues
+
+
+    def _get_scan_info(self):
+        scan_info = {}
+
+        scan_info['directory'] = conf.target
+        scan_info['scan_time'] = time.strftime(
+            "%Y-%m-%d %H:%M:%S", time.localtime())
+
+        scan_info['scope_titles'] = []
+        scan_info['scope_contents'] = []
+        for scope,linenum in filemgr.scope_statistics.iteritems():
+            scan_info['scope_titles'].append(scope)
+            scan_info['scope_contents'].append(linenum)
+
+        scan_info['severity_contents'] = \
+            [v for k,v in issuemgr.statistics().iteritems()]
+
+        return scan_info
+
+
+    def _report(self):
+        import pdb;pdb.set_trace()
+        scan_info = self._get_scan_info()
+        issues = self._get_formated_issues()
+
+        template_file = os.path.join(conf.pkgpath, "data", 
+            "html_report_template.html")
+
+        with open(template_file) as _file:
+            template = Template(_file.read().decode("utf-8"))
+
+            return template.render(scaninfo=scan_info, issues=issues)
+
+
+
+class JsonReporter(Reporter):
+    def _report(self):
+        return json.dumps(issuemgr, indent=2)
+
+
+
+class DatabaseReporter(Reporter):
+    def _report(self):
+        db = IssueDatabase(self._filename)
 
         scope_titles = []
         scope_contents = []
@@ -190,21 +250,11 @@ class HtmlReporter(Reporter):
             scope_titles.append(scope)
             scope_contents.append(linenum)
 
-        issues = []
+        db.record_scan_info(conf.target, ",".join(scope_titles), 
+            ",".join([str(x) for x in scope_contents]))
+
         for issue in issuemgr:
-            new_issue = dict(**issue)
-            new_issue['file_link'] = self._get_file_link(issue['filename'])
-            new_issue['context'] = self._format_issue_context(issue)
+            db.add_issue(issue)
 
-            issues.append(new_issue)
+        return None
 
-        html = render_html(fobj.name, directory, scan_time, statistics, 
-            scope_titles, scope_contents, issues)
-
-        fobj.write(html)
-        fobj.flush()
-
-
-
-class DatabaseReporter(Reporter):
-    pass

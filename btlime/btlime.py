@@ -7,6 +7,7 @@ Btlime, a sublime plugin for finding security bugs.
 Copyright (c) 2016 alpha1e0
 '''
 
+
 import os
 import re
 import yaml
@@ -22,6 +23,7 @@ BTLIME_SCOPE = 'btlime.info'
 BTLIME_SETTING_FILE = 'btlime.sublime-settings'
 BTLIME_SYNTAX_FILE = "Packages/btlime/btlime.sublime-syntax"
 DEFAULT_ENCODING = "utf-8"
+
 
 
 class FileError(Exception):
@@ -52,6 +54,9 @@ class YamlConf(object):
 
 
 def run_in_thread(func):
+    '''
+    线程运行函数修饰器
+    '''
     def thread_func(*args, **kwargs):
         def run():
             r = func(*args, **kwargs)
@@ -64,18 +69,32 @@ def run_in_thread(func):
 
 
 class current(object):
+    '''
+    current类，用于获取当前信息，例如：
+        当前光标所在region
+        当前光标的单词
+    '''
     @classmethod
     def point(cls, view):
+        '''
+        获取当前view中光标所在偏移（相对于文本文件中第一个字符）
+        '''
         return view.sel()[0].a
 
 
     @classmethod
     def region(cls, view):
+        '''
+        获取当前view的当前region信息（[start_index, end_index])
+        '''
         return view.sel()[0]
 
 
     @classmethod
     def wordregion(cls, view):
+        '''
+        获取当前view选中的单词的region，或者当前view光标所在单词的region
+        '''
         sel = view.sel()[0]
         if sel.a == sel.b:
             return view.word(sel)
@@ -85,16 +104,25 @@ class current(object):
 
     @classmethod
     def regions(cls, view):
+        '''
+        获取当前view所有regions
+        '''
         return [r for r in view.sel()]
 
 
     @classmethod
     def scope(cls, view):
+        '''
+        获取当前view的scope信息，例如：source.python
+        '''
         return view.scope_name(view.sel()[0].a)
 
 
     @classmethod
     def word(cls, view):
+        '''
+        获取当前选中的单词
+        '''
         return view.substr(cls.wordregion(view))
 
 
@@ -106,6 +134,9 @@ class current(object):
 
     @classmethod
     def projdir(cls, view):
+        '''
+        获取当前文件所在的forder
+        '''
         window = view.window()
 
         for folder in window.folders():
@@ -134,17 +165,10 @@ class current(object):
 
 
     @classmethod
-    def result_entry(cls, view):
-        pass
-
-
-    @classmethod
-    def result_fileloc(cls, view):
-        pass
-
-
-    @classmethod
     def cache_dir(cls, view):
+        '''
+        获取临时文件、缓存文件保存的目录
+        '''
         settings = sublime.load_settings(BTLIME_SETTING_FILE)
         cachedir = settings.get("cache_directory_name", ".btlime-cache")
         projdir = cls.projdir(view)
@@ -154,6 +178,9 @@ class current(object):
 
     @classmethod
     def review_file(cls, view):
+        '''
+        获取review_file
+        '''
         projdir = cls.projdir(view)
 
         return CacheFile(projdir, 'review')
@@ -161,6 +188,9 @@ class current(object):
 
     @classmethod
     def trace_file(cls, view):
+        '''
+        获取trace_file
+        '''
         projdir = cls.projdir(view)
 
         return CacheFile(projdir, 'trace')
@@ -168,6 +198,9 @@ class current(object):
 
     @classmethod
     def trash_file(cls, view):
+        '''
+        获取trash_file
+        '''
         projdir = cls.projdir(view)
 
         return CacheFile(projdir, 'trash')
@@ -175,14 +208,23 @@ class current(object):
 
 
 def show_error(msg):
+    '''
+    弹窗显示错误信息
+    '''
     sublime.error_message(str(msg))
 
 
 def show_status(msg):
+    '''
+    状态栏显示信息
+    '''
     sublime.active_window().status_message(str(msg))
 
 
 def is_btlime_info(view):
+    '''
+    判断是否为scope=btlime.info
+    '''
     return view.match_selector(current.point(view), "btlime.info")
 
 
@@ -754,7 +796,7 @@ class FindAllCommand(sublime_plugin.TextCommand):
 
     def _get_match_info(self, current_region, match_word):
         '''
-        获取当前位置之前的所有匹配位置
+        获取所有匹配位置
         '''
         index = 0
         all_match_regions = self.view.find_all(match_word, sublime.LITERAL)
@@ -797,10 +839,7 @@ class FindAllCommand(sublime_plugin.TextCommand):
         regions = self.view.get_regions(self.FINDING_KEY)
         
         if regions:
-            current_region = current.wordregion(self.view)
-            for region in regions:
-                if region == current_region:
-                    return True
+            return True
         
         return False
 
@@ -847,10 +886,7 @@ class FindFirstCommand(sublime_plugin.TextCommand):
         regions = self.view.get_regions(self.FINDING_KEY)
         
         if regions:
-            current_region = current.wordregion(self.view)
-            for region in regions:
-                if region == current_region:
-                    return True
+            return True
         
         return False
 
@@ -858,7 +894,7 @@ class FindFirstCommand(sublime_plugin.TextCommand):
 
 class CleanFindingsCommand(sublime_plugin.TextCommand):
     def run(self, edit, **args):
-        self.view.erase_regions(FindForwardCommand.FINDING_KEY)
+        self.view.erase_regions(FindAllCommand.FINDING_KEY)
         self.view.erase_regions(ShowIssueCommand.ISSUE_KEY)
         self.view.settings().set("is_finding", False)
 
@@ -887,7 +923,6 @@ class RecordtoReviewCommand(sublime_plugin.TextCommand):
         
         review_file = current.review_file(self.view)
         review_file.append("\n"+context+"\n")
-
 
 
 

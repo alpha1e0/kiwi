@@ -11,10 +11,10 @@ Copyright (c) 2016 alpha1e0
 import os
 import re
 
-from commons import YamlConf
-from commons import conf
+from common import YamlConf
+from common import conf
 from context import MatchContext
-from exceptions import FileError
+from exception import FileError
 from issuemgr import issuemgr
 
 

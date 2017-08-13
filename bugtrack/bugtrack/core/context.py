@@ -8,6 +8,7 @@ Copyright (c) 2016 alpha1e0
 '''
 
 
+
 class MatchContext(object):
     '''
     漏洞匹配的上下文信息类
@@ -36,6 +37,13 @@ class MatchContext(object):
 
 
     def get_ctx_lines(self, ctxrange):
+        '''
+        获取上下文信息
+        @params:
+            ctxrange: 整数，获取上下文的行数
+        @returns:
+            [(lineno, line)...]
+        '''
         idx = 0
         for i in range(len(self.ctxlines)):
             if self.ctxlines[i][0] == self.lineno:
@@ -49,6 +57,28 @@ class MatchContext(object):
         e = e if e<len(self.ctxlines) else len(self.ctxlines)
 
         return self.ctxlines[s:e]
+
+
+    def get_decoded_ctx_lines(self, ctxrange):
+        '''
+        获取上下文信息
+            和get_ctx_lines的区别在于，对每行进行解码
+        '''
+        ctx_lines = self.get_ctx_lines(ctxrange)
+
+        result = []
+        for line in ctx_lines:
+            try:
+                decode_line = line[1].decode("utf-8")
+            except UnicodeDecodeError:
+                try:
+                    decode_line = line[1].decode("gbk")
+                except UnicodeDecodeError:
+                    decode_line = repr(line[1])
+
+            result.append((line[0], decode_line))
+
+        return result
 
 
     @property
