@@ -1,0 +1,107 @@
+[
+    {
+        "caption": "Kiwilime",
+        "id": "kiwilime",
+        "children":
+        [
+            {
+                "caption": "Kiwilime Settings",
+                "id": "kiwilime-settings",
+                "children":
+                [
+                    {
+                        "command": "open_file",
+                        "args": {"file": "${packages}/kiwilime/kiwilime.sublime-settings"},
+                        "caption": "Main settings"
+                    },
+                    {
+                        "command": "open_file",
+                        "args": {"file": "${packages}/kiwilime/Default.sublime-keymap"},
+                        "caption": "Key bindings"
+                    },
+                    {
+                        "command": "open_issue_def",
+                        "caption": "Issue defines"
+                    },
+                ]
+            },
+            { "caption": "-" },
+            {
+                "caption": "Jump To",   
+                "id": "jump-location",
+                "command": "jump_location"
+
+            },
+            {
+                "caption": "Send to Trash",
+                "id": "sendto-trash",
+                "command": "sendto_trash"
+
+            },
+            {
+                "caption": "Send to Review",
+                "id": "sendto-review",
+                "command": "sendto_review"
+
+            },
+            { "caption": "-" },
+            {
+                "caption": "Show/Hide Issues",
+                "id": "show-issue",
+                "command": "show_issue"
+
+            },
+            {
+                "caption": "Code Search",
+    
+                "id": "code-search",
+                "command": "code_search"
+
+            },
+            {
+                "caption": "Find Forward",
+                "id": "find-forward",
+                "command": "find_all",
+                "args": {"forward": true}
+
+            },
+            {
+                "caption": "Find Backward",
+                "id": "find-backward",
+                "command": "find_all",
+                "args": {"forward": false}
+
+            },
+            {
+                "caption": "Find First",
+                "id": "find-first",
+                "command": "find_first"
+
+            },
+            {
+                "caption": "Clean Findings",
+                "id": "clean-findings",
+                "command": "clean_findings"
+
+            },
+            {
+                "caption": "Record to Review",
+                "id": "recordto-review",
+                "command": "recordto_review"
+
+            },
+            {
+                "caption": "Record to Trace",
+                "id": "recordto-trace",
+                "command": "recordto_trace"
+
+            },
+            { "caption": "-" },
+            {
+                "command": "open_file",
+                "args": {"file": "${packages}/kiwilime/README.md"},
+                "caption": "README"
+            },
+        ]
+    }
+]

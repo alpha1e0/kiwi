@@ -1,0 +1,2 @@
+include kiwi/data/*
+include kiwi/ui/webui/templates/*

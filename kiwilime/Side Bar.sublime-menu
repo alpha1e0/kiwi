@@ -1,0 +1,24 @@
+[
+    {
+        "caption": "-"
+    },
+    {
+        "caption": "Code analyze",
+        "command": "run_kiwi",
+        "args": {
+            "dirs": [],
+            "files": []
+        }
+    },
+    {
+        "caption": "Kiwilime code search",
+        "command": "global_code_search",
+        "args": {
+            "dirs": [],
+            "files": []
+        }
+    },
+    {
+        "caption": "-", "id": "kiwi_commands"
+    }
+]

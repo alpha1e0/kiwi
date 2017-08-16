@@ -1,0 +1,23 @@
+{
+    "cache_directory_name": ".kiwilime-cache",
+    "kiwi_command": "/Users/apple/pentest/kiwi/kiwi/kiwi.py",
+    "code_search_command": "/Users/apple/bin/pt",
+    "result_context": 2,
+    "issuedef": [
+        {
+            "scope": "source.python",
+            "filename": "python",
+            "exts": ["py", "py3", "pyw", "pyi", "rpy", "cpy", "SConstruct", "Sconstruct", "sconstruct", "SConscript", "gyp", "gypi", "Snakefile", "wscript"]
+        },
+        {
+            "scope": "source.java",
+            "filename": "java",
+            "exts": ["java", "bsh"]
+        },
+        {
+            "scope": "embedding.php",
+            "filename": "php",
+            "exts": ["php", "php3", "php4", "php5", "php7", "phps", "phpt", "phtml"]
+        }
+    ]
+}

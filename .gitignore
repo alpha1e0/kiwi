@@ -2,7 +2,7 @@
 *.pyc
 test.py
 track.md
-/bugtrack/bugtrack.egg-info
-/bugtrack/dist
-/bugtrack/build
+/kiwi/kiwi.egg-info
+/kiwi/dist
+/kiwi/build
 .DS_Store

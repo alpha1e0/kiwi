@@ -1,0 +1,108 @@
+%YAML 1.2
+---
+# See http://www.sublimetext.com/docs/3/syntax.html
+name: kiwilime
+file_extensions:
+  - kiwi
+first_line_match: ^#!kiwilime
+scope: kiwilime.info
+
+contexts:
+  main:
+    - match: \+--
+      push: banner
+
+    - match: ^\|
+      push: banner
+
+    - match: ^([-=]+)$
+      captures:
+        1: kiwilime.separator
+
+
+    - match: "Scaning <(.+)> at (.+)$"
+      captures:
+        1: kiwilime.scaninfo.project
+        2: kiwilime.scaninfo.scantime
+
+    - match: "(Found sensitive files as follows:)"
+      captures:
+        1: kiwilime.title
+
+    - match: ^(@.+)$
+      captures:
+        1: kiwilime.filename
+
+    - match: ^(\d+)-
+      captures:
+        1: kiwilime.lineno
+
+    - match: "^(\\d+)\\:\\s(.*)$"
+      captures:
+        1: kiwilime.lineno
+        2: kiwilime.matchline
+
+    - match: "(Found security issues as follows:)"
+      captures:
+        1: kiwilime.title
+
+    - match: ^\[(\w+):(.+)\]$
+      captures:
+        1: kiwilime.issue.id
+        2: kiwilime.issue.info
+
+    - match: <(Match):([^>]+)>
+      captures:
+        1: kiwilime.issue.label
+        2: kiwilime.issue.pattern
+
+    - match: <(Severity|Confidence):(High)>
+      captures:
+        1: kiwilime.issue.label
+        2: kiwilime.level.high
+
+    - match: <(Severity|Confidence):(Medium)>
+      captures:
+        1: kiwilime.issue.label
+        2: kiwilime.level.medium
+
+    - match: <(Severity|Confidence):(Low)>
+      captures:
+        1: kiwilime.issue.label
+        2: kiwilime.level.low
+
+    - match: <(Severity|Confidence):(Info)>
+      captures:
+        1: kiwilime.issue.label
+        2: kiwilime.level.info
+
+    - match: "(#.*)$"
+      captures:
+        1: kiwilime.comment
+
+    - match: "(Statistics information:)"
+      captures:
+        1: kiwilime.title
+
+    - match: ^(High:\s\d+)
+      captures:
+        1: kiwilime.level.high
+
+    - match: ^(Medium:\s\d+)
+      captures:
+        1: kiwilime.level.medium
+
+    - match: ^(Low:\s\d+)
+      captures:
+        1: kiwilime.level.low
+
+    - match: ^(Info:\s\d+)
+      captures:
+        1: kiwilime.level.info
+
+  banner:
+    - meta_scope: kiwilime.banner
+    - match: --\+
+      pop: true
+    - match: \|$
+      pop: true

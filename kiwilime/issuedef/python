@@ -1,0 +1,55 @@
+%YAML 1.2
+---
+
+#===============================================================================
+# Kiwilime, Security tool for auditing source code
+# Copyright (c) 2016 alpha1e0
+# -----------------------------------------------------------------------------
+# Issue defination for source.python
+#===============================================================================
+
+version: 1.0
+scope: source.python
+
+default-patterns:
+  - \bos.system\b
+  - \bos.popen\b
+  - \bos.popen2\b
+  - \bos.popen3\b
+  - \bos.popen4\b
+  - \bpopen2.popen2\b
+  - \bpopen2.popen3\b
+  - \bpopen2.popen4\b
+  - \bpopen2.Popen3\b
+  - \bpopen2.Popen4\b
+  - \bcommands.getoutput\b
+  - \bcommands.getstatusoutput\b
+  - \bsubprocess.call\b
+  - \bsubprocess.Popen\b
+  - \bsubprocess.check_call\b
+  - \bsubprocess.check_output\b
+  - \butils.execute\b
+  - \butils.execute_with_timeout\b
+  - \bos.remove\b
+  - \bos.unlink\b
+  - \bos.rmdir\b
+  - \bos.removedirs\b
+  - \bshutil.rmtree\b
+  - \bpickle/cPickle\b
+  - \bpickle.load\b
+  - \bpickle.dump\b
+  - \byaml.load\b
+  - \byaml.dump\b
+  - \beval\b
+  - \beval_r\b
+  - \bexec\b
+  - \bexecfile\b
+  - \["']select.+from
+  - \["']insert.+into
+  - \["']update.+set
+  - \["']drop
+  - \["']delete.+from
+
+# Add user defined patterns here
+user-patterns:
+#  - somepattern
