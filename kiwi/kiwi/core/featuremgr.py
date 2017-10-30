@@ -150,7 +150,7 @@ class FeatureManager(object):
 
             for feature in feature_def['features']:
                 if conf.feature_ids:
-                    if feature.ID not in conf.feature_ids:
+                    if feature['ID'] not in conf.feature_ids:
                         continue
                 features.append(Feature(feature, scopes, self._efmgr))
 

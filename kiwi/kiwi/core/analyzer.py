@@ -10,6 +10,7 @@ Copyright (c) 2016 alpha1e0
 
 import sys
 
+from common import Out
 from common import conf
 from filemgr import filemgr
 from featuremgr import featuremgr
@@ -26,6 +27,9 @@ class Analyzer(object):
         featuremgr.init()
 
         for file in filemgr.walk():
+            if conf.verbose:
+                Out.info("scanning file {0}".format(file.filename))
+                
             try:
                 for feature in featuremgr[file.scope]:
                     matchctxes = file.match(feature.patterns, conf.ectx)

@@ -52,7 +52,7 @@ class IDParamParser(argparse.Action):
                 except IOError:
                     Out.error("can not open file {0}".format(file_name))
             else:
-                new_values.append(line)
+                new_values.append(value)
 
         setattr(namespace, self.dest, new_values)
 
@@ -62,8 +62,7 @@ def main():
     out = Out()
     out.init(u"Kiwi 代码安全扫描")
 
-    parser = argparse.ArgumentParser(description="Kiwi. Audit source code"
-        " for security issuses")
+    parser = argparse.ArgumentParser(description=u"Kiwi. 代码安全审计工具")
 
     parser.add_argument("-t", "--target", required=True, 
         action=TargetParamParser, help=u"指定待扫描的目录")
@@ -82,6 +81,8 @@ def main():
         help=u"指定用于评估漏洞所需的上下文信息的文件行数")
     parser.add_argument("-o", "--outputs", nargs="+",
         help=u"指定输出报告文件，支持.txt/.html/.json/.db")
+    parser.add_argument("-v", "--verbose", action="store_true",
+        help=u"详细模式，输出扫描过程信息")
     
     args = parser.parse_args()
 
@@ -100,3 +101,4 @@ def main():
         reporter.report()
 
     out.close()
+

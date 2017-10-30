@@ -55,7 +55,7 @@
 
     git clone https://github.com/alpha1e0/kiwi.git
 
-**Step 1.** 
+**Step 2.** 
 
 打开 Sublime Text 3 package-directory
 

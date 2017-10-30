@@ -45,19 +45,22 @@ def get_reports(report_path, current_report=None):
 
 
 def get_formated_issues(origin_issues, scan_info):
-    def _get_filelink(filename, scandir):
+    def _get_filelink(filename, scandir, lineno):
             opengrok_base = os.getenv("KIWI_OPENGROK_BASE")
             if not opengrok_base:
                 return filename
 
-            scandir_sp = os.path.split(scandir)
-            filename_sp = os.path.split(filename)
+            scandir_basename = os.path.basename(scandir)
+            scandir_sp = scandir.split(os.sep)
+            filename_sp = filename.split(os.sep)
             
             if len(filename_sp) <= len(scandir_sp):
                 return filename
             else:
-                rest_filename_sp = filename_sp[len(scandir_sp):]
-                return os.path.join(opengrok_base, rest_filename_sp)
+                rest_filename_sp = os.sep.join(filename_sp[len(scandir_sp):])
+                return os.path.join(opengrok_base.rstrip("/"), 
+                    scandir_basename, 
+                    rest_filename_sp) + "#{0}".format(lineno)
 
 
     issues = []
@@ -67,7 +70,7 @@ def get_formated_issues(origin_issues, scan_info):
         new_issue['id'] = issue['id']
         new_issue['issueid'] = issue['issueid']
         new_issue['filelink'] = _get_filelink(issue['filename'], 
-            scan_info['directory'])
+            scan_info['directory'], issue['lineno'])
 
         new_issue['context'] = json.loads(issue['context'])
 
@@ -79,6 +82,8 @@ def get_formated_issues(origin_issues, scan_info):
 
         new_issue['confidence_class'] = confidence_map[issue['confidence']][0]
         new_issue['confidence_prompt'] = confidence_map[issue['confidence']][1]
+
+        new_issue['comment'] = issue['comment'] or ""
 
         issues.append(new_issue)
 

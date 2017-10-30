@@ -22,7 +22,7 @@ from application import application
 
 def main():
     out = Out()
-    out.init(u"Kiwi 报告查看器")
+    out.init("Kiwi report browser.")
 
     parser = argparse.ArgumentParser(description="Kiwi. Audit source code"
         " for security issuses")

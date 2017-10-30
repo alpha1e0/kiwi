@@ -52,6 +52,14 @@ class Reporter(object):
         self._filename = filename
 
 
+    @property
+    def now(self):
+        '''
+        字符串形式返回当前时间
+        '''
+        return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+
+
     def _banner(self):
         '''
         return banner information
@@ -136,7 +144,7 @@ class TextReporter(Reporter):
         title = u"{banner}\nScaning <{directory}> at {time}".format(
                 banner = self.banner,
                 directory = conf.target,
-                time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+                time = self.now)
 
         issues_content = "-"*80 + "\nFound security issues as follows:\n\n"
         for issue in issuemgr:
@@ -203,8 +211,7 @@ class ConsoleReporter(TextReporter):
 
         title = u"Scaning <{directory}> at {time}".format(
                 directory = Out.R(conf.target),
-                time = Out.R(
-                    time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
+                time = Out.R(self.now))
 
         issues_content = \
             Out.Y("-"*80 + "\nFound security issues as follows:\n\n")
@@ -230,19 +237,22 @@ class ConsoleReporter(TextReporter):
 
 class HtmlReporter(Reporter):
     def _get_formated_issues(self):
-        def _get_filelink(filename, scandir):
+        def _get_filelink(filename, scandir, lineno):
             opengrok_base = os.getenv("KIWI_OPENGROK_BASE")
             if not opengrok_base:
                 return filename
 
-            scandir_sp = os.path.split(scandir)
-            filename_sp = os.path.split(filename)
+            scandir_basename = os.path.basename(scandir)
+            scandir_sp = scandir.split(os.sep)
+            filename_sp = filename.split(os.sep)
             
             if len(filename_sp) <= len(scandir_sp):
                 return filename
             else:
-                rest_filename_sp = filename_sp[len(scandir_sp):]
-                return os.path.join(opengrok_base, rest_filename_sp)
+                rest_filename_sp = os.sep.join(filename_sp[len(scandir_sp):])
+                return os.path.join(opengrok_base.rstrip("/"), 
+                    scandir_basename, 
+                    rest_filename_sp) + "#{0}".format(lineno)
 
 
         issues = []
@@ -250,7 +260,7 @@ class HtmlReporter(Reporter):
             new_issue = dict(issue)
             new_issue['issueid'] = issue['ID']
             new_issue['filelink'] = _get_filelink(issue['filename'],
-                conf.target)
+                conf.target, issue['lineno'])
 
             new_issue['status_class'] = status_map[issue['status']][0]
             new_issue['status_prompt'] = status_map[issue['status']][1] 
