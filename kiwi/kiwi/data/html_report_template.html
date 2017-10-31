@@ -184,6 +184,10 @@ hr.strong {
     border-color: #2e6da4;
     color: #fff;
 }
+.issue-link {
+    color: #4F4F4F;
+    text-decoration:none
+}
 
 
 </style>
@@ -236,54 +240,12 @@ hr.strong {
 </div>
 
 <hr class='strong' />
-
-<div class="select-box">
-    <label class='label label-large'>漏洞等级筛选：</label>
-    <input type="checkbox" value="all" name="issue-level" checked="checked" /> 高
-    <input type="checkbox" value="high" name="issue-level" checked="checked" /> 中
-    <input type="checkbox" value="medium" name="issue-level" checked="checked" /> 低
-    <input type="checkbox" value="low" name="issue-level" checked="checked" /> 提示
-</div>
-
-<div class="select-box">
-    <label class='label label-large'>漏洞状态筛选：</label>
-    <input type="checkbox" value="new" name="issue-status" checked="checked" /> 新漏洞
-    <input type="checkbox" value="old" name="issue-status" checked="checked" /> 老漏洞
-    <input type="checkbox" value="failsep" name="issue-status" checked="checked" /> 误报漏洞
-</div>
-
-<div class="select-box">
-    <label class='label label-large'>漏洞类型筛选：</label><br />
-    <table class="issue-table" width="100%">
-        <tr>
-            <td><input type="checkbox" value="PY_CMD_EXE_001" name="issue-type" checked="checked" /> PY_CMD_EXE_001</td>
-            <td><input type="checkbox" value="PY_CMD_EXE_001" name="issue-type" checked="checked" /> PY_CMD_EXE_001</td>
-            <td><input type="checkbox" value="PY_CMD_EXE_001" name="issue-type" checked="checked" /> PY_CMD_EXE_001</td>
-            <td><input type="checkbox" value="PY_CMD_EXE_001" name="issue-type" checked="checked" /> PY_CMD_EXE_001</td>
-            <td><input type="checkbox" value="PY_CMD_EXE_001" name="issue-type" checked="checked" /> PY_CMD_EXE_001</td>
-            <td><input type="checkbox" value="PY_CMD_EXE_001" name="issue-type" checked="checked" /> PY_CMD_EXE_001</td>
-        </tr>
-        <tr>
-            <td><input type="checkbox" value="PY_CMD_EXE_001" name="issue-type" checked="checked" /> PY_CMD_EXE_001</td>
-            <td><input type="checkbox" value="PY_CMD_EXE_001" name="issue-type" checked="checked" /> PY_CMD_EXE_001</td>
-            <td><input type="checkbox" value="PY_CMD_EXE_001" name="issue-type" checked="checked" /> PY_CMD_EXE_001</td>
-            <td><input type="checkbox" value="PY_CMD_EXE_001" name="issue-type" checked="checked" /> PY_CMD_EXE_001</td>
-        </tr>
-    </table>
-</div>
-
-<div class="select-box">
-    <button class="btn">选择全部</button>
-    <button class="btn">取消全部选择</button>
-    <button class="btn btn-primary">开始筛选</button>
-</div>
-
-<hr class='strong' />
 <div id='results'>
 {% for issue in issues %}
-    <div class='issue'>
+    <div class='issue' id='{{issue.id}}'>
         <div class='issue-block'>
             <div class='issue-label'>
+                <span class='label label-high'><a class='issue-link' href="#{{issue.id}}">ISSUE-{{issue.id}}</a></span>
                 <span class='label label-{{issue.status_class}}'>{{issue.status_prompt}}</span>
                 <span class='label label-{{issue.severity_class}}'>{{issue.severity_prompt}}</span>
                 <span class='label label-{{issue.confidence_class}}'>{{issue.confidence_prompt}}</span>
@@ -308,6 +270,6 @@ hr.strong {
 {% endfor %}
 </div>
 </div>
-<div class='footer'><a href='https://github.com/alpha1e0/kiwi'>Kiwi.</a> Security tool for auditing source code.</div>
+<div class='footer'>© Copyright 2017, alpha1e0. <a href='https://github.com/alpha1e0/kiwi'>Kiwi.</a></div>
 </body>
 </html>

@@ -256,8 +256,12 @@ class HtmlReporter(Reporter):
 
 
         issues = []
+        i = 0
         for issue in issuemgr:
             new_issue = dict(issue)
+
+            i += 1
+            new_issue['id'] = i
             new_issue['issueid'] = issue['ID']
             new_issue['filelink'] = _get_filelink(issue['filename'],
                 conf.target, issue['lineno'])
