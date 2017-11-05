@@ -158,6 +158,9 @@ hr.strong {
 .label-info {
     background-color: #5cb85c;
 }
+.label-id {
+    background-color: #F0F0F0;
+}
 
 .select-box {
     margin: 2px 5px 3px 15px;
@@ -185,7 +188,7 @@ hr.strong {
     color: #fff;
 }
 .issue-link {
-    color: #4F4F4F;
+    color: #FF0000;
     text-decoration:none
 }
 
@@ -245,12 +248,12 @@ hr.strong {
     <div class='issue' id='{{issue.id}}'>
         <div class='issue-block'>
             <div class='issue-label'>
-                <span class='label label-high'><a class='issue-link' href="#{{issue.id}}">ISSUE-{{issue.id}}</a></span>
-                <span class='label label-{{issue.status_class}}'>{{issue.status_prompt}}</span>
-                <span class='label label-{{issue.severity_class}}'>{{issue.severity_prompt}}</span>
+                <span class='label label-id'><a class='issue-link' href="#{{issue.id}}">ISSUE-{{issue.id}}</a></span>
+                <span class='label label-{{issue.status_class}}' id='issue_status'>{{issue.status_prompt}}</span>
+                <span class='label label-{{issue.severity_class}}' id='issue_severity'>{{issue.severity_prompt}}</span>
                 <span class='label label-{{issue.confidence_class}}'>{{issue.confidence_prompt}}</span>
             </div>
-            <div class='issue-title'>
+            <div class='issue-title' id='{{issue.issueid}}'>
                 <b>{{issue.issueid}}: </b> {{issue.name}}<br>
             </div>
             <b>匹配关键字: </b><ins class='issue-pattern'>{{issue.pattern}}</ins>&nbsp&nbsp
@@ -270,6 +273,6 @@ hr.strong {
 {% endfor %}
 </div>
 </div>
-<div class='footer'>© Copyright 2017, alpha1e0. <a href='https://github.com/alpha1e0/kiwi'>Kiwi.</a></div>
+<div class='footer'>© Copyright 2017, alpha1e0. See <a href='https://github.com/alpha1e0/kiwi'>Kiwi.</a></div>
 </body>
 </html>

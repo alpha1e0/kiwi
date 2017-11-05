@@ -13,6 +13,7 @@ import time
 import json
 import sqlite3
 
+from common import conf
 from collections import OrderedDict
 from exception import IssueFormatError
 from exception import DatabaseError
@@ -140,7 +141,7 @@ class IssueDatabase(object):
 
     def _create(self):
         '''
-        创建数据库和Issues表
+        创建数据库和Info/Issues表
         '''
         self._connect()
 
@@ -212,7 +213,20 @@ class IssueDatabase(object):
         return result
 
 
+    def is_issue_recorded(self, issue):
+        query_cmd = ("select * from Issues where name=?  and "
+            "pattern=? and filename=? and lineno=?")
+
+        result = self._query(query_cmd, (str(issue.name),
+            str(issue.pattern), str(issue.filename), issue.lineno))
+
+        return True if result else False
+
+
     def add_issue(self, issue):
+        if self.is_issue_recorded(issue):
+            return
+            
         insert_cmd = ("insert into Issues(issueid, name, scope, severity, "
             "confidence, reference, pattern, filename, lineno, "
             "context, status, comment) values(?, ?, ?, ?, ?, ?, ?, ?, ?,"

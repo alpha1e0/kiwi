@@ -193,8 +193,11 @@ div.sidebar li.active a:link, div.sidebar li.active a:visited {
 .label-info {
     background-color: #5cb85c;
 }
+.label-id {
+    background-color: #F0F0F0;
+}
 .issue-link {
-    color: #4F4F4F;
+    color: #FF0000;
     text-decoration:none
 }
 
@@ -284,7 +287,7 @@ div.sidebar li.active a:link, div.sidebar li.active a:visited {
     <div class='issue' id='{{issue.id}}'>
         <div class='issue-block'>
             <div class='issue-label'>
-                <span class='label label-high'><a class='issue-link' href="#{{issue.id}}">ISSUE-{{issue.id}}</a></span>
+                <span class='label label-id'><a class='issue-link' href="#{{issue.id}}">ISSUE-{{issue.id}}</a></span>
                 <span class='label label-{{issue.status_class}}'>{{issue.status_prompt}}</span>
                 <span class='label label-{{issue.severity_class}}'>{{issue.severity_prompt}}</span>
                 <span class='label label-{{issue.confidence_class}}'>{{issue.confidence_prompt}}</span>
@@ -326,7 +329,7 @@ div.sidebar li.active a:link, div.sidebar li.active a:visited {
 </div>
 <hr class='strong' />
 <hr class='strong' />
-<div class='footer'>© Copyright 2017, alpha1e0. <a href='https://github.com/alpha1e0/kiwi'>Kiwi.</a></div>
+<div class='footer'>© Copyright 2017, alpha1e0. See <a href='https://github.com/alpha1e0/kiwi'>Kiwi.</a></div>
 </div>
 </body>
 </html>

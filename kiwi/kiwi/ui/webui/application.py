@@ -126,7 +126,7 @@ def view_report():
     report_file = os.path.join(application.report_path, current_report) + ".db"
     rdb = IssueDatabase(report_file)
 
-    origin_scan_info = rdb.get_scan_info()[0]
+    origin_scan_info = rdb.get_scan_info()[-1]
     severity_info, status_info = rdb.statistics()
 
     scan_info = get_scan_info(origin_scan_info, reports, current_report, 
