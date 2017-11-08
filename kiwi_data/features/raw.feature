@@ -14,7 +14,6 @@ engine: GrepEngine
 
 scopes:
   - raw
-  - python
 
 features:
 - ID: RAW_PASSWD_INFO_001
