@@ -63,8 +63,6 @@
 
 # 3 kiwi 使用
 
-删除各个目录下的readme
-
 `kiwi`在安装后会生成两个 console-script：
 - kiwi. kiwi的扫描入口命令
 - kiwi-report. 用于查看db类型的扫描报告
