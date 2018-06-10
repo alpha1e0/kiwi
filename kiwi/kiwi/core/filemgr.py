@@ -114,6 +114,7 @@ class File(object):
         result = []
         for pattern in patterns:
             for match in pattern.finditer(self._content):
+                # 找到正则匹配的信息在文件中哪一行
                 for index, line in enumerate(self._formated_lines):
                     if match.start()>=line[1][0] and match.start()<line[1][1]:
                         ctxlines = self.get_context_lines(index+1, ctxrange)

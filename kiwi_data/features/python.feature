@@ -47,7 +47,7 @@ features:
     - subprocess.check_output
     - utils.execute
     - utils.execute_with_timeout
-  evaluate: py_cmd_inject_0002
+  evaluate: py_cmd_inject_0002_evaluate
 
 
 - ID: PY_CMD_EXE_001

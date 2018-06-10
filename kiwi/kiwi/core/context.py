@@ -8,7 +8,6 @@ Copyright (c) 2016 alpha1e0
 '''
 
 
-
 class MatchContext(object):
     '''
     漏洞匹配的上下文信息类

@@ -282,7 +282,17 @@ senfiles规则非常简单，仅仅是一系列的正则表达式，例如：
 评估函数的原型是固定的，使用 `@evaluate` 修饰器来限定，参数有两个：
 
 - feature. feature即使用的规则定义，和规则文件内的内容完全对应
-- matchctx. matchctx是一个对象，包含 filename/match\_pattern/match\_lineno/match\_lines 4个属性
+- matchctx. matchctx是一个 `MatchContext` 上下文对象，包含匹配上下文的一些信息
+
+`MatchContext` 提供以下方法、属性供使用：
+
+- 属性: filename. 匹配的代码文件文件名
+- 属性: lineno. 匹配的代码文件匹配行行数
+- 属性: match_line. 匹配行的代码字符串
+- 属性: str_ctx. 匹配的上下文代码字符串（上下文行数和命令行参数--ectx对应）
+- 方法: contains(keyword). 返回匹配行是否包含keyword关键字
+- 方法: ctx_contains(keyword). 返回匹配上下文是否包含keyword关键字
+
 
 
 ## 3.3 生成报告

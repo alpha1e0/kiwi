@@ -13,6 +13,7 @@ import sys
 import time
 import abc
 import json
+import cgi
 
 from jinja2 import Template
 
@@ -236,6 +237,8 @@ class ConsoleReporter(TextReporter):
 
 
 class HtmlReporter(Reporter):
+    CONTEXT_LINE_LENGTH = 120  # HTML报告中context最大长度
+
     def _get_formated_issues(self):
         def _get_filelink(filename, scandir, lineno):
             opengrok_base = os.getenv("KIWI_OPENGROK_BASE")
@@ -253,6 +256,12 @@ class HtmlReporter(Reporter):
                 return os.path.join(opengrok_base.rstrip("/"), 
                     scandir_basename, 
                     rest_filename_sp) + "#{0}".format(lineno)
+
+        def _format_ctx_line(line):
+            ret_line = cgi.escape(line)
+            if len(ret_line) > self.CONTEXT_LINE_LENGTH:
+                ret_line = ret_line[:self.CONTEXT_LINE_LENGTH]+"......\n"
+            return ret_line
 
 
         issues = []
@@ -272,8 +281,13 @@ class HtmlReporter(Reporter):
             new_issue['severity_class'] = severity_map[issue['severity']][0]
             new_issue['severity_prompt'] = severity_map[issue['severity']][1]
 
-            new_issue['confidence_class'] = confidence_map[issue['confidence']][0]
-            new_issue['confidence_prompt'] = confidence_map[issue['confidence']][1]
+            new_issue['confidence_class'] = \
+                confidence_map[issue['confidence']][0]
+            new_issue['confidence_prompt'] = \
+                confidence_map[issue['confidence']][1]
+
+            new_issue['context'] = [(l[0], _format_ctx_line(l[1])) \
+                for l in issue['context']]
 
             issues.append(new_issue)
 

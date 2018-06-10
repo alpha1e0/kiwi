@@ -11,10 +11,9 @@ Copyright (c) 2016 alpha1e0
 from kiwi.core.featuremgr import evaluate
 
 
-
 @evaluate
-def py_cmd_inject_0002_evaluate(feature, matchctx):
-    if matchctx.contains("shell=True"):
+def php_file_inclusion_001_evaluate(feature, matchctx):
+    if matchctx.contains("$"):
         return (feature['severity'], feature['confidence'])
     else:
         return None
