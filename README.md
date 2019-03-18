@@ -82,6 +82,7 @@
 
 将 **kiwilime** 目录整个 copy 到 package-directory
 
+**kiwilime** 的运行依赖于 [the_platinum_searcher](https://github.com/monochromegane/the_platinum_searcher) 工具，从 [https://github.com/monochromegane/the_platinum_searcher/releases](https://github.com/monochromegane/the_platinum_searcher/releases) 下载编译好的工具，并将其加入到环境变量。
 
 # 3 kiwi 使用
 
