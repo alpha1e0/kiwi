@@ -112,7 +112,7 @@
       -e EXTENSIONS [EXTENSIONS ...], --extensions EXTENSIONS [EXTENSIONS ...]
                             指定扫描哪些类型文件，例如-e php js则扫描.php .js文件
       --igexts IGEXTS [IGEXTS ...]
-                            指定忽略扫描哪些类型文件，例如--igexts php js则扫描.php .js文件
+                            指定忽略扫描哪些类型文件，例如--igexts php js则忽略扫描.php .js文件
       --excludes EXCLUDES [EXCLUDES ...]
                             忽略扫描文件路径包含关键字的文件
       -c SCTX, --sctx SCTX  指定扫描结果显示的上下文行数
