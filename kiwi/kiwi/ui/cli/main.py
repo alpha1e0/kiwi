@@ -72,7 +72,7 @@ def main():
     parser.add_argument("-e", "--extensions", nargs="+",
         help=u"指定扫描哪些类型文件，例如-e php js则扫描.php .js文件")
     parser.add_argument("--igexts", nargs="+",
-        help=u"指定忽略扫描哪些类型文件，例如--igexts php js则扫描.php .js文件")
+        help=u"指定忽略扫描哪些类型文件，例如--igexts php js则忽略扫描.php .js文件")
     parser.add_argument("--excludes", nargs="+",
         help=u"忽略扫描文件路径包含关键字的文件")
     parser.add_argument("-c", "--sctx", type=int, default=2,
