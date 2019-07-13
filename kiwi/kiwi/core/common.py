@@ -34,7 +34,7 @@ class YamlConf(object):
     def __new__(cls, path):
         try:
             _file = open(path,"r")
-            result = yaml.load(_file)
+            result = yaml.load(_file, Loader=yaml.FullLoader)
         except IOError:
             raise FileError(
                 "Loading yaml file '{0}' failed, read file failed".format(path))

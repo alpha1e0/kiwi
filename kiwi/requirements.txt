@@ -1,5 +1,5 @@
 appdirs>=1.4.0
-pyyaml>=3.11
+pyyaml>=5.1.1
 colorama>=0.3.7
 flask>=0.12.2
 eventlet>=0.21.0
