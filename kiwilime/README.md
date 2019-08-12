@@ -23,7 +23,7 @@
 
     git clone https://github.com/alpha1e0/kiwi.git
 
-**Step 1.** 
+**Step 2.** 
 
 打开 Sublime Text 3 package-directory
 
@@ -33,5 +33,8 @@
 
 将 **kiwilime** 目录整个 copy 到 package-directory
 
-# 3 使用
+**Setp 4.**
+
+下载pt工具（kilime用该工具进行代码搜索）。[下载地址](https://github.com/monochromegane/the_platinum_searcher/releases)
+
 
